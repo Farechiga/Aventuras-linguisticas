@@ -160,7 +160,7 @@
     <div class="container">
         <div class="logo">
             <!-- Replace this with your static PNG logo -->
-            <img src="Aventuras Linguisticas Logo.png" alt="¡Aventuras lingüísticas! Logo" />
+            <img src="Aventuras_Linguisticas_Logo.png" alt="¡Aventuras lingüísticas! Logo" />
         </div>
         
         <a href="game.html" class="play-button">¡Vamos a jugar!</a>
