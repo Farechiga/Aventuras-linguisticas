@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Aventuras lingüísticas!</title>
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive, sans-serif;
+        }
+        
+        body {
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Animated Background - Same as the game page */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(45deg, #7ABFFF, #8CA9F2, #9B93E7, #B07BDC, #C462D0, #DA47C3);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Gradient on left and right edges */
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            width: 15vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        body::before {
+            left: 0;
+            background: linear-gradient(to right, rgba(0, 9, 33, 0.3), rgba(0, 9, 33, 0));
+        }
+        
+        body::after {
+            right: 0;
+            background: linear-gradient(to left, rgba(0, 9, 33, 0.3), rgba(0, 9, 33, 0));
+        }
+        
+        /* Main Content */
+        .container {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 20px;
+            max-width: 100%;
+        }
+        
+        /* Logo */
+        .logo {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+        
+        .logo img {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.2));
+        }
+        
+        /* Play Button */
+        .play-button {
+            display: inline-block;
+            background: linear-gradient(45deg, #800080, #9932CC);
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            padding: 18px 40px;
+            border-radius: 50px;
+            border: 3px solid white;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.4);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .play-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), 0 0 30px rgba(255, 255, 255, 0.6);
+        }
+        
+        .play-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Stars Animation */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0;
+            animation: twinkle 5s infinite;
+        }
+        
+        @keyframes twinkle {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .logo {
+                max-width: 90%;
+                margin-bottom: 30px;
+            }
+            
+            .play-button {
+                font-size: 22px;
+                padding: 15px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="stars" id="stars"></div>
+    
+    <div class="container">
+        <div class="logo">
+            <!-- Replace this with your static PNG logo -->
+            <img src="Aventuras Linguisticas Logo.png" alt="¡Aventuras lingüísticas! Logo" />
+        </div>
+        
+        <a href="game.html" class="play-button">¡Vamos a jugar!</a>
+    </div>
+    
+    <script>
+        // Create twinkling stars
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 75;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                // Vary the size between 1px and 5px
+                const size = 1 + Math.random() * 4;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                
+                // Add a subtle glow effect to larger stars
+                if (size > 3) {
+                    star.style.boxShadow = `0 0 ${size}px rgba(255, 255, 255, 0.7)`;
+                }
+                
+                // Randomize position
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                
+                // Vary animation speed and delay
+                star.style.animationDuration = `${3 + Math.random() * 4}s`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            createStars();
+        });
+    </script>
+</body>
+</html>
