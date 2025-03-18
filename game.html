@@ -378,8 +378,8 @@ body::after {
         <div class="manuscript">
             <div class="character-image" id="current-character"></div>
             
-<div class="instruction-text">Seraphina please help the character choose the correct Spanish translation!</div>
-
+            <div class="instruction-text">Seraphina please help the character choose the correct Spanish translation!</div>
+        
             <div class="english-sentence" id="english-text">
                 Loading question...
             </div>
@@ -387,20 +387,25 @@ body::after {
             <div class="spanish-options" id="spanish-options">
                 <!-- Options will be dynamically added here -->
             </div>
+            
+            <!-- Add these two div elements right here -->
+            <div id="segment-container"></div>
+            <div id="drop-zones-container"></div>
+            <!-- End of added elements -->
         </div>
-    </div>
     
     <!-- Celebration overlay -->
     <div class="celebration" id="celebration"></div>
     
     <script>
-        // Game state variables
-        let currentCharacterIndex = 0;
-        let currentSentenceIndex = 0;
-        let correctCount = 0;
-        let currentCorrectOption = null;
-	let recentlyUsedQuestions = [];
-	const maxRecentQuestions = 10; // Adjust as needed
+// Global variables for tracking state
+let currentCharacterIndex = -1; // Start with an invalid index
+let currentSentenceIndex = -1;
+let currentCorrectOption = '';
+let recentlyUsedQuestions = [];
+const maxRecentQuestions = 10;
+let selectedCharacter = null; // Add this
+let correctCount = 0; // Add this
         
         // DOM elements
         const characterImage = document.getElementById('current-character');
@@ -6649,7 +6654,7 @@ sentences: [
     english: "Dick repaired the broken boat engine with improvised tools.",
     spanish: "Dick reparó el motor averiado del bote con herramientas improvisadas.",
     segments: {
-      spanish: ["Dick", "reparó el motor", "averiado del bote", "con herramientas improvisadas."],
+      spanish: ["Dick", "reparó", "el motor averiado del bote", "con herramientas improvisadas."],
       english: ["Dick", "repaired", "the broken boat engine", "with improvised tools."]
     }
   },
@@ -6896,134 +6901,211 @@ sentences: [
                     };
                 }
             }
-            
-            loadQuestion();
-        });
-        
-// Load a new question
-function loadQuestion() {
-    // Reset options container
-    spanishOptions.innerHTML = '';
-    
-    // Remove any existing translation hint
-    const existingHint = document.querySelector('.translation-hint');
-    if (existingHint) {
-        existingHint.remove();
-    }
-    
-    // Select random character and sentence, avoiding recent questions
-    let randomCharacterIndex, randomSentenceIndex, questionKey;
-    let attempts = 0;
-    const maxAttempts = 5; // Limit attempts to find a new question
-    
-    do {
-        randomCharacterIndex = Math.floor(Math.random() * translationData.length);
-        const selectedCharacter = translationData[randomCharacterIndex];
-        randomSentenceIndex = Math.floor(Math.random() * selectedCharacter.sentences.length);
-        questionKey = `${randomCharacterIndex}-${randomSentenceIndex}`;
-        attempts++;
-    } while (recentlyUsedQuestions.includes(questionKey) && attempts < maxAttempts);
-    
-    // Store the selected question in recently used list
-    recentlyUsedQuestions.push(questionKey);
-    if (recentlyUsedQuestions.length > maxRecentQuestions) {
-        recentlyUsedQuestions.shift(); // Remove oldest question
-    }
-    
-    // Get the selected character and sentence
-    const selectedCharacter = translationData[randomCharacterIndex];
-    const sentenceData = selectedCharacter.sentences[randomSentenceIndex];
-    
-    // Store current selections
-    currentCharacterIndex = randomCharacterIndex;
-    currentSentenceIndex = randomSentenceIndex;
-    
-    // Update character image with SVG
-    const characterIcon = characterIcons[selectedCharacter.character] || characterIcons.default;
-    characterImage.style.backgroundImage = `url('${characterIcon}')`;
-    
-    // Update English text
-    englishText.textContent = sentenceData.english;
+// Add this at the beginning of your script before any other code
+let translationData = []; // Will be filled with your actual data
+let selectedCharacter = null;
+let currentCorrectOption = null;
+let correctCount = 0;
 
-    // Get the correct Spanish translation
-    const correctOption = sentenceData.spanish;
-    currentCorrectOption = correctOption;
+// DOM element references - add these before any functions
+let segmentContainer;
+let dropZonesContainer;
+let spanishOptions;
+let celebration;
+let correctCountDisplay;
+
+// Initialize DOM references when the page loads
+window.addEventListener('DOMContentLoaded', function() {
+    // Get DOM element references
+    segmentContainer = document.getElementById('segment-container');
+    dropZonesContainer = document.getElementById('drop-zones-container');
+    spanishOptions = document.getElementById('spanish-options');
+    celebration = document.getElementById('celebration');
+    correctCountDisplay = document.getElementById('correct-count');
     
-    // Get random incorrect options from other sentences
-    const incorrectOptions = getRandomIncorrectOptions(selectedCharacter, randomSentenceIndex);
+    // Load the voices first
+    if (window.speechSynthesis) {
+        // Pre-load the voices
+        window.speechSynthesis.getVoices();
+        
+        // In Chrome and some other browsers, voices are loaded asynchronously
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = function() {
+                // Voices are now loaded
+                console.log("Voices loaded:", window.speechSynthesis.getVoices().length);
+            };
+        }
+    }
     
-    // Create and shuffle Spanish options
-    const options = [correctOption, ...incorrectOptions];
-    shuffleArray(options);
+    // Add basic event handlers if they don't exist
+    // These should be properly implemented based on your needs
+    if (typeof handleDragStart !== 'function') {
+        window.handleDragStart = function(e) {
+            e.dataTransfer.setData('text/plain', e.target.dataset.segment);
+            e.target.classList.add('dragging');
+        };
+    }
     
-    // Add options to the container
-    options.forEach((option) => {
-        const optionElement = document.createElement('div');
-        optionElement.className = 'spanish-option';
-        optionElement.textContent = option;
-        optionElement.addEventListener('click', function() {
-            // Cancel any ongoing speech
-            window.speechSynthesis.cancel();
+    if (typeof handleDragEnd !== 'function') {
+        window.handleDragEnd = function(e) {
+            e.target.classList.remove('dragging');
+        };
+    }
+    
+    if (typeof handleDragOver !== 'function') {
+        window.handleDragOver = function(e) {
+            e.preventDefault();
+        };
+    }
+    
+    if (typeof handleDragEnter !== 'function') {
+        window.handleDragEnter = function(e) {
+            e.preventDefault();
+            e.target.classList.add('drag-over');
+        };
+    }
+    
+    if (typeof handleDragLeave !== 'function') {
+        window.handleDragLeave = function(e) {
+            e.target.classList.remove('drag-over');
+        };
+    }
+    
+    if (typeof handleDrop !== 'function') {
+        window.handleDrop = function(e) {
+            e.preventDefault();
+            e.target.classList.remove('drag-over');
+            const segment = e.dataTransfer.getData('text/plain');
+            const correctSegment = e.target.getAttribute('data-correct-segment');
             
-            // Check if this is the correct option
-            if (option === currentCorrectOption) {
-                // Mark as correct
-                this.classList.add('correct');
-                
-                // Speak the Spanish text
-                speakSpanishText(option, function() {
-                    // After speech finishes, show the segment matching game
-                    setTimeout(() => {
-                        showSegmentMatchingGame(sentenceData);
-                    }, 500);
-                });
-                
-                // Update score
-                correctCount++;
-                correctCountDisplay.textContent = correctCount;
-                
-                // Show celebration
-                showCelebration();
-            } else {
-                // Incorrect answer
-                this.classList.add('incorrect');
-                
-                // Find the English translation for this incorrect Spanish option
-                let translationFound = false;
-                
-                // Search through all characters and sentences
-                for (const character of translationData) {
-                    for (const sentence of character.sentences) {
-                        if (sentence.spanish === option) {
-                            // Create or update translation hint
-                            let hintElement = document.querySelector('.translation-hint');
-                            if (!hintElement) {
-                                hintElement = document.createElement('div');
-                                hintElement.className = 'translation-hint';
-                                spanishOptions.insertAdjacentElement('afterend', hintElement);
-                            }
-                            
-                            hintElement.innerHTML = `
-                            <p><strong>This actually means:</strong></p>
-                            <p>"${sentence.english}"</p>
-                            <p>Try again to find the correct match!</p>
-                            `;
-                            
-                            translationFound = true;
-                            break;
-                        }
-                    }
-                    if (translationFound) break;
-                }
-                
-                // Remove the incorrect class after animation finishes
-                setTimeout(function() {
-                    optionElement.classList.remove('incorrect');
-                }, 500);
+            if (segment === correctSegment) {
+                e.target.textContent = segment;
+                e.target.classList.add('correct-drop');
+                document.querySelector(`[data-segment="${segment}"]`).style.display = 'none';
+            }
+        };
+    }
+    
+    if (typeof handleEnglishSegmentClick !== 'function') {
+        window.handleEnglishSegmentClick = function(element, state) {
+            console.log("English segment clicked", element, state);
+            // Implement based on your requirements
+        };
+    }
+    
+    // Now load the first question
+    loadQuestion();
+});
+        
+
+// Replace the entire loadQuestion function with this fixed version
+function loadQuestion() {
+    // Get a random character from the translation data
+    const randomIndex = Math.floor(Math.random() * translationData.length);
+    selectedCharacter = translationData[randomIndex];
+    
+    console.log("Total characters:", translationData.length);
+    console.log("Selected character:", selectedCharacter.character);
+    console.log("Random index selected:", randomIndex);
+    
+    // Update the character display
+    document.getElementById('character-name').textContent = selectedCharacter.character;
+    
+    // Clear previous segments
+    segmentContainer.innerHTML = '';
+    dropZonesContainer.innerHTML = '';
+    
+    // Get the sentences for this character
+    const sentences = selectedCharacter.sentences;
+    
+    // Select a random sentence from this character
+    const randomSentenceIndex = Math.floor(Math.random() * sentences.length);
+    const selectedSentence = sentences[randomSentenceIndex];
+    
+    console.log("Selected sentence:", selectedSentence);
+    
+    // Display the English sentence
+    document.getElementById('english-sentence').textContent = selectedSentence.english;
+    
+    // Get the Spanish segments (now inside a segments object)
+    const spanishSegments = selectedSentence.segments.spanish;
+    
+    // Shuffle the segments for display
+    const shuffledSegments = [...spanishSegments].sort(() => Math.random() - 0.5);
+    
+    // Create draggable segments
+    shuffledSegments.forEach((segment, index) => {
+        const segmentElement = document.createElement('div');
+        segmentElement.className = 'segment';
+        segmentElement.textContent = segment;
+        segmentElement.setAttribute('draggable', 'true');
+        segmentElement.setAttribute('data-segment', segment);
+        segmentElement.id = `segment-${index}`;
+        
+        segmentElement.addEventListener('dragstart', handleDragStart);
+        segmentElement.addEventListener('dragend', handleDragEnd);
+        
+        segmentContainer.appendChild(segmentElement);
+    });
+    
+    // Create drop zones for each correct Spanish segment (in order)
+    spanishSegments.forEach((segment, index) => {
+        const dropZone = document.createElement('div');
+        dropZone.className = 'drop-zone';
+        dropZone.setAttribute('data-correct-segment', segment);
+        dropZone.id = `drop-zone-${index}`;
+        
+        dropZone.addEventListener('dragover', handleDragOver);
+        dropZone.addEventListener('dragenter', handleDragEnter);
+        dropZone.addEventListener('dragleave', handleDragLeave);
+        dropZone.addEventListener('drop', handleDrop);
+        
+        dropZonesContainer.appendChild(dropZone);
+    });
+}
+
+// Updated getRandomIncorrectOptions function
+function getRandomIncorrectOptions(characterData, currentCharacterIndex, currentSentenceIndex) {
+    // Create a pool of all sentences excluding the current one
+    let sentencePool = [];
+    
+    // First, add sentences from OTHER characters to ensure variety
+    translationData.forEach((charData, charIdx) => {
+        if (charIdx !== currentCharacterIndex) {
+            // Add sentences from other characters first to prioritize variety
+            charData.sentences.forEach(sentence => {
+                sentencePool.push(sentence);
+            });
+        }
+    });
+    
+    // If we need more options, add sentences from current character (except current sentence)
+    if (sentencePool.length < 3) {
+        characterData.sentences.forEach((sentence, idx) => {
+            if (idx !== currentSentenceIndex) {
+                sentencePool.push(sentence);
             }
         });
-        spanishOptions.appendChild(optionElement);
-    });
+    }
+    
+    // Shuffle the pool and take the first 2
+    shuffleArray(sentencePool);
+    
+    return sentencePool.slice(0, 2).map(sentence => sentence.spanish);
+}
+
+// Updated shuffleArray function to ensure proper randomization
+function shuffleArray(array) {
+    // Make a copy to avoid modifying the original
+    const shuffled = [...array];
+    
+    // Fisher-Yates shuffle algorithm
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    
+    return shuffled;
 }
 
 // Function to show segment matching game after selecting correct translation
@@ -7528,33 +7610,6 @@ window.addEventListener('DOMContentLoaded', function() {
     loadQuestion();
 });
 
-// Get random incorrect options from other sentences
-function getRandomIncorrectOptions(characterData, currentIndex) {
-    // Create a pool of all sentences excluding the current one
-    let sentencePool = [];
-    
-    // Add sentences from the current character (except the current sentence)
-    characterData.sentences.forEach((sentence, idx) => {
-        if (idx !== currentIndex) {
-            sentencePool.push(sentence);
-        }
-    });
-    
-    // Add sentences from other characters if needed
-    if (sentencePool.length < 2) {
-        translationData.forEach((charData, idx) => {
-            if (idx !== currentCharacterIndex) {
-                sentencePool = sentencePool.concat(charData.sentences);
-            }
-        });
-    }
-    
-    // Shuffle the pool and take the first 2
-    shuffleArray(sentencePool);
-    
-    return sentencePool.slice(0, 2).map(sentence => sentence.spanish);
-}
-
 // Check if the selected answer is correct
 function checkAnswer(selectedOption, selectedElement) {
     if (selectedOption === currentCorrectOption) {
@@ -7658,6 +7713,12 @@ function speakSpanishText(text, callback) {
 
 // Show celebration animation
 function showCelebration() {
+    // Check if celebration element exists
+    if (!celebration) {
+        console.error("Celebration element not found!");
+        return;
+    }
+    
     celebration.style.display = 'block';
     celebration.innerHTML = '';
     
