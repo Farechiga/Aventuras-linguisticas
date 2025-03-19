@@ -398,6 +398,134 @@ body::after {
     <div class="celebration" id="celebration"></div>
     
     <script>
+// Global state variables
+let translationData = [];
+let selectedCharacter = null;
+let currentCorrectOption = null;
+let correctCount = 0;
+
+// DOM element references
+let segmentContainer;
+let dropZonesContainer;
+let spanishOptions;
+let celebration;
+let correctCountDisplay;
+let englishText;
+
+// Place the DOMContentLoaded event listener here, at the very beginning
+window.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM Content Loaded - initializing game");
+    
+    // Get DOM element references
+    englishText = document.getElementById('english-text');
+    spanishOptions = document.getElementById('spanish-options');
+    segmentContainer = document.getElementById('segment-container');
+    dropZonesContainer = document.getElementById('drop-zones-container');
+    celebration = document.getElementById('celebration');
+    correctCountDisplay = document.querySelector('.correct-count');
+    
+    // Load the voices first (this can be asynchronous in some browsers)
+    if (window.speechSynthesis) {
+        // Pre-load the voices
+        window.speechSynthesis.getVoices();
+        
+        // In Chrome and some other browsers, voices are loaded asynchronously
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = function() {
+                // Voices are now loaded
+                console.log("Voices loaded:", window.speechSynthesis.getVoices().length);
+            };
+        }
+    }
+    
+    // Add event delegation for English segments
+    document.addEventListener('click', function(event) {
+        if (event.target.classList.contains('english-segment')) {
+            handleEnglishSegmentClick(event.target);
+        }
+    });
+    
+    // Initialize game
+    loadQuestion();
+});
+
+function loadQuestion() {
+    console.log("Loading a question...");
+    
+    // Ensure translation data is loaded
+    if (!translationData || translationData.length === 0) {
+        console.error("Translation data not loaded yet");
+        return;
+    }
+    
+    // Clear any previous feedback
+    const existingHint = document.querySelector('.translation-hint');
+    if (existingHint) existingHint.remove();
+    
+    // Remove previous selection classes
+    document.querySelectorAll('.spanish-option').forEach(option => {
+        option.classList.remove('correct', 'incorrect', 'selected');
+    });
+    
+    // Get a random character
+    const randomIndex = Math.floor(Math.random() * translationData.length);
+    selectedCharacter = translationData[randomIndex];
+    
+    // Set character image if available
+    const characterImage = document.getElementById('current-character');
+    if (characterImage) {
+        characterImage.style.backgroundImage = `url('images/${selectedCharacter.character.toLowerCase()}.png')`;
+    }
+    
+    // Get a random sentence from this character
+    const sentences = selectedCharacter.sentences;
+    const randomSentenceIndex = Math.floor(Math.random() * sentences.length);
+    const selectedSentence = sentences[randomSentenceIndex];
+    
+    // Display the English sentence
+    if (englishText) {
+        englishText.textContent = selectedSentence.english;
+    } else {
+        console.error("English text element not found");
+    }
+    
+    // Get correct Spanish translation
+    currentCorrectOption = selectedSentence.spanish;
+    
+    // Get incorrect options
+    const incorrectOptions = getRandomIncorrectOptions(selectedCharacter, randomIndex, randomSentenceIndex);
+    
+    // Combine and shuffle options
+    const allOptions = [currentCorrectOption, ...incorrectOptions];
+    const shuffledOptions = shuffleArray(allOptions);
+    
+    // Display options
+    if (spanishOptions) {
+        spanishOptions.innerHTML = '';
+        
+        shuffledOptions.forEach(option => {
+            const optionButton = document.createElement('div');
+            optionButton.className = 'spanish-option';
+            optionButton.textContent = option;
+            
+            optionButton.addEventListener('click', function() {
+                checkAnswer(option, this);
+            });
+            
+            spanishOptions.appendChild(optionButton);
+        });
+    } else {
+        console.error("Spanish options element not found");
+    }
+}
+
+// Your other functions...
+
+// Your translation data should also be defined OUTSIDE the event listener
+const translationData = [
+    // Your translation data here
+];
+
 // Global variables for tracking state
 let currentCharacterIndex = -1; // Start with an invalid index
 let currentSentenceIndex = -1;
@@ -408,20 +536,11 @@ let selectedCharacter = null; // Add this
 let correctCount = 0; // Add this
         
         // DOM elements
-        const characterImage = document.getElementById('current-character');
         const englishText = document.getElementById('english-text');
         const spanishOptions = document.getElementById('spanish-options');
         const correctCountDisplay = document.querySelector('.correct-count');
         const celebration = document.getElementById('celebration');
-        
-        // Character SVG icons
-        const characterIcons = {
-            "Belle": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"50\" cy=\"35\" r=\"25\" fill=\"%23FFD700\"/><path d=\"M30 65 L50 40 L70 65 Z\" fill=\"%23FFCC99\"/><rect x=\"35\" y=\"65\" width=\"30\" height=\"20\" fill=\"%23FFB6C1\"/></svg>",
-            "Cinderella": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"50\" cy=\"35\" r=\"25\" fill=\"%23ADD8E6\"/><path d=\"M30 65 L50 40 L70 65 Z\" fill=\"%23FFCC99\"/><rect x=\"35\" y=\"65\" width=\"30\" height=\"20\" fill=\"%238FBC8F\"/></svg>",
-            "Mulan": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"50\" cy=\"35\" r=\"25\" fill=\"%23000000\"/><path d=\"M30 65 L50 40 L70 65 Z\" fill=\"%23FFCC99\"/><rect x=\"35\" y=\"65\" width=\"30\" height=\"20\" fill=\"%23CD5C5C\"/></svg>",
-            "Aurora": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"50\" cy=\"35\" r=\"25\" fill=\"%23FFB6C1\"/><path d=\"M30 65 L50 40 L70 65 Z\" fill=\"%23FFCC99\"/><rect x=\"35\" y=\"65\" width=\"30\" height=\"20\" fill=\"%23DA70D6\"/></svg>",
-            "default": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"50\" cy=\"40\" r=\"25\" fill=\"%23FFD700\"/><rect x=\"25\" y=\"70\" width=\"50\" height=\"20\" fill=\"%23A52A2A\"/></svg>"
-        };
+
         
         // Translation data
         const translationData = [
@@ -6886,8 +7005,12 @@ sentences: [
   }
 ];
         
-        // Initialize the game on page load
-        window.addEventListener('DOMContentLoaded', function() {
+    // Just log the existing data
+    console.log("Translation data loaded with", translationData.length, "characters");
+// Initialize game
+loadQuestion();
+});
+
             // Load the voices first (this can be asynchronous in some browsers)
             if (window.speechSynthesis) {
                 // Pre-load the voices
@@ -6901,41 +7024,6 @@ sentences: [
                     };
                 }
             }
-// Add this at the beginning of your script before any other code
-let translationData = []; // Will be filled with your actual data
-let selectedCharacter = null;
-let currentCorrectOption = null;
-let correctCount = 0;
-
-// DOM element references - add these before any functions
-let segmentContainer;
-let dropZonesContainer;
-let spanishOptions;
-let celebration;
-let correctCountDisplay;
-
-// Initialize DOM references when the page loads
-window.addEventListener('DOMContentLoaded', function() {
-    // Get DOM element references
-    segmentContainer = document.getElementById('segment-container');
-    dropZonesContainer = document.getElementById('drop-zones-container');
-    spanishOptions = document.getElementById('spanish-options');
-    celebration = document.getElementById('celebration');
-    correctCountDisplay = document.getElementById('correct-count');
-    
-    // Load the voices first
-    if (window.speechSynthesis) {
-        // Pre-load the voices
-        window.speechSynthesis.getVoices();
-        
-        // In Chrome and some other browsers, voices are loaded asynchronously
-        if (speechSynthesis.onvoiceschanged !== undefined) {
-            speechSynthesis.onvoiceschanged = function() {
-                // Voices are now loaded
-                console.log("Voices loaded:", window.speechSynthesis.getVoices().length);
-            };
-        }
-    }
     
     // Add basic event handlers if they don't exist
     // These should be properly implemented based on your needs
@@ -6992,106 +7080,33 @@ window.addEventListener('DOMContentLoaded', function() {
             // Implement based on your requirements
         };
     }
-    
-    // Now load the first question
-    loadQuestion();
 });
         
-
-// Replace the entire loadQuestion function with this fixed version
-function loadQuestion() {
-    // Get a random character from the translation data
-    const randomIndex = Math.floor(Math.random() * translationData.length);
-    selectedCharacter = translationData[randomIndex];
-    
-    console.log("Total characters:", translationData.length);
-    console.log("Selected character:", selectedCharacter.character);
-    console.log("Random index selected:", randomIndex);
-    
-    // Update the character display
-    document.getElementById('character-name').textContent = selectedCharacter.character;
-    
-    // Clear previous segments
-    segmentContainer.innerHTML = '';
-    dropZonesContainer.innerHTML = '';
-    
-    // Get the sentences for this character
-    const sentences = selectedCharacter.sentences;
-    
-    // Select a random sentence from this character
-    const randomSentenceIndex = Math.floor(Math.random() * sentences.length);
-    const selectedSentence = sentences[randomSentenceIndex];
-    
-    console.log("Selected sentence:", selectedSentence);
-    
-    // Display the English sentence
-    document.getElementById('english-sentence').textContent = selectedSentence.english;
-    
-    // Get the Spanish segments (now inside a segments object)
-    const spanishSegments = selectedSentence.segments.spanish;
-    
-    // Shuffle the segments for display
-    const shuffledSegments = [...spanishSegments].sort(() => Math.random() - 0.5);
-    
-    // Create draggable segments
-    shuffledSegments.forEach((segment, index) => {
-        const segmentElement = document.createElement('div');
-        segmentElement.className = 'segment';
-        segmentElement.textContent = segment;
-        segmentElement.setAttribute('draggable', 'true');
-        segmentElement.setAttribute('data-segment', segment);
-        segmentElement.id = `segment-${index}`;
-        
-        segmentElement.addEventListener('dragstart', handleDragStart);
-        segmentElement.addEventListener('dragend', handleDragEnd);
-        
-        segmentContainer.appendChild(segmentElement);
-    });
-    
-    // Create drop zones for each correct Spanish segment (in order)
-    spanishSegments.forEach((segment, index) => {
-        const dropZone = document.createElement('div');
-        dropZone.className = 'drop-zone';
-        dropZone.setAttribute('data-correct-segment', segment);
-        dropZone.id = `drop-zone-${index}`;
-        
-        dropZone.addEventListener('dragover', handleDragOver);
-        dropZone.addEventListener('dragenter', handleDragEnter);
-        dropZone.addEventListener('dragleave', handleDragLeave);
-        dropZone.addEventListener('drop', handleDrop);
-        
-        dropZonesContainer.appendChild(dropZone);
-    });
-}
-
 // Updated getRandomIncorrectOptions function
 function getRandomIncorrectOptions(characterData, currentCharacterIndex, currentSentenceIndex) {
     // Create a pool of all sentences excluding the current one
     let sentencePool = [];
     
-    // First, add sentences from OTHER characters to ensure variety
+    // Add sentences from other characters
     translationData.forEach((charData, charIdx) => {
         if (charIdx !== currentCharacterIndex) {
-            // Add sentences from other characters first to prioritize variety
             charData.sentences.forEach(sentence => {
-                sentencePool.push(sentence);
+                sentencePool.push(sentence.spanish);
             });
         }
     });
     
-    // If we need more options, add sentences from current character (except current sentence)
-    if (sentencePool.length < 3) {
-        characterData.sentences.forEach((sentence, idx) => {
-            if (idx !== currentSentenceIndex) {
-                sentencePool.push(sentence);
-            }
-        });
-    }
+    // Add sentences from current character (except current sentence)
+    characterData.sentences.forEach((sentence, idx) => {
+        if (idx !== currentSentenceIndex) {
+            sentencePool.push(sentence.spanish);
+        }
+    });
     
     // Shuffle the pool and take the first 2
     shuffleArray(sentencePool);
     
-    return sentencePool.slice(0, 2).map(sentence => sentence.spanish);
+    return sentencePool.slice(0, 2);
 }
 
 // Updated shuffleArray function to ensure proper randomization
@@ -7567,85 +7582,59 @@ function addDragDropStyles() {
     document.head.appendChild(style);
 }
 
-// Updated initialization code
-window.addEventListener('DOMContentLoaded', function() {
-    // Load the voices first (this can be asynchronous in some browsers)
-    if (window.speechSynthesis) {
-        // Pre-load the voices
-        window.speechSynthesis.getVoices();
-        
-        // In Chrome and some other browsers, voices are loaded asynchronously
-        if (speechSynthesis.onvoiceschanged !== undefined) {
-            speechSynthesis.onvoiceschanged = function() {
-                // Voices are now loaded
-                console.log("Voices loaded:", window.speechSynthesis.getVoices().length);
-            };
-        }
-    }
+function checkAnswer(selectedOption, buttonElement) {
+    console.log("Checking answer:", selectedOption);
     
-    // Add event delegation for English segments
-    document.addEventListener('click', function(event) {
-        if (event.target.classList.contains('english-segment')) {
-            // Find the state object
-            const container = event.target.closest('.segment-matching-container');
-            if (container) {
-                const spanishSegments = container.querySelectorAll('.spanish-segment');
-                if (spanishSegments.length > 0) {
-                    const firstSpanishSegment = spanishSegments[0];
-                    const state = {
-                        selectedEnglishIndex: null,
-                        matchedPairs: new Set(
-                            Array.from(container.querySelectorAll('.english-segment.matched'))
-                                .map(el => parseInt(el.dataset.index))
-                        ),
-                        shuffledIndices: Array.from(spanishSegments)
-                            .map(el => parseInt(el.dataset.shuffledIndex))
-                    };
-                    handleEnglishSegmentClick(event.target, state);
-                }
-            }
-        }
+    // Remove any previously selected options
+    document.querySelectorAll('.spanish-option.selected').forEach(el => {
+        el.classList.remove('selected');
     });
     
-    loadQuestion();
-});
-
-// Check if the selected answer is correct
-function checkAnswer(selectedOption, selectedElement) {
+    // Mark this option as selected
+    buttonElement.classList.add('selected');
+    
     if (selectedOption === currentCorrectOption) {
-        selectedElement.classList.add('correct');
+        // Correct answer
+        buttonElement.classList.add('correct');
         correctCount++;
-        correctCountDisplay.textContent = correctCount;
-
+        
+        // Update score display
+        if (correctCountDisplay) {
+            correctCountDisplay.textContent = correctCount;
+        }
+        
         // Show celebration animation
         showCelebration();
         
-        // Note: We don't load the next question here anymore
-        // It will be handled by the speech callback in the click event
+        // Speak the correct Spanish sentence
+        speakSpanishText(currentCorrectOption, function() {
+            // Load next question after delay and speech
+            setTimeout(loadQuestion, 1500);
+        });
     } else {
         // Incorrect answer
-        selectedElement.classList.add('incorrect');
+        buttonElement.classList.add('incorrect');
         
-        // Find the English translation for this incorrect Spanish option
+        // Add hint if available
         let translationFound = false;
         
-        // Search through all characters and sentences
         for (const character of translationData) {
             for (const sentence of character.sentences) {
                 if (sentence.spanish === selectedOption) {
-                    // Create or update translation hint
-                    let hintElement = document.querySelector('.translation-hint');
-                    if (!hintElement) {
-                        hintElement = document.createElement('div');
-                        hintElement.className = 'translation-hint';
-                        spanishOptions.insertAdjacentElement('afterend', hintElement);
-                    }
-                    
+                    const hintElement = document.createElement('div');
+                    hintElement.className = 'translation-hint';
                     hintElement.innerHTML = `
-                    <p><strong>This actually means:</strong></p>
-                    <p>"${sentence.english}"</p>
-                    <p>Try again to find the correct match!</p>
+                        <p><strong>This actually means:</strong></p>
+                        <p>"${sentence.english}"</p>
+                        <p>Try again!</p>
                     `;
+                    
+                    // Remove any existing hint
+                    const existingHint = document.querySelector('.translation-hint');
+                    if (existingHint) existingHint.remove();
+                    
+                    // Add new hint
+                    spanishOptions.insertAdjacentElement('afterend', hintElement);
                     
                     translationFound = true;
                     break;
@@ -7654,68 +7643,18 @@ function checkAnswer(selectedOption, selectedElement) {
             if (translationFound) break;
         }
         
-        // Remove the incorrect class after animation finishes
+        // Remove incorrect class after animation
         setTimeout(function() {
-            selectedElement.classList.remove('incorrect');
+            buttonElement.classList.remove('incorrect');
         }, 500);
     }
 }
 
-// Function to narrate a Spanish sentence and wait for completion
-function narrateSentence(sentence, callback) {
-    const utterance = new SpeechSynthesisUtterance(sentence);
-    
-    // Set Spanish as the narration language
-    utterance.lang = 'es-ES';
-    
-    // Optional: Adjust narration settings
-    utterance.rate = 1.0; // Normal speed
-    utterance.pitch = 7.9; // Normal pitch
-    utterance.volume = 1.0; // Full volume
-
-    // Ensure the next step happens only after narration finishes
-    utterance.onend = function() {
-        if (callback) callback();
-    };
-
-    // Speak the sentence
-    speechSynthesis.speak(utterance);
-}
-
-// Function to speak Spanish text with a female voice and allow callback when complete
-function speakSpanishText(text, callback) {
-    // Create a new utterance
-    const utterance = new SpeechSynthesisUtterance(text);
-    
-    // Set language to Spanish
-    utterance.lang = 'es-ES';
-    
-    // Get available voices
-    const voices = window.speechSynthesis.getVoices();
-    
-    // Try to find a female Spanish voice
-    const spanishFemaleVoice = voices.find(voice => 
-        voice.lang.includes('es') && voice.name.includes('Female'));
-    
-    // Use the Spanish female voice if found, otherwise just use the language setting
-    if (spanishFemaleVoice) {
-        utterance.voice = spanishFemaleVoice;
-    }
-    
-    // Add the callback for when speech is complete
-    if (callback) {
-        utterance.onend = callback;
-    }
-    
-    // Speak the text
-    window.speechSynthesis.speak(utterance);
-}
-
-// Show celebration animation
 function showCelebration() {
-    // Check if celebration element exists
+    console.log("Showing celebration!");
+    
     if (!celebration) {
-        console.error("Celebration element not found!");
+        console.error("Celebration element not found");
         return;
     }
     
@@ -7727,7 +7666,9 @@ function showCelebration() {
         const confetti = document.createElement('div');
         confetti.className = 'confetti';
         confetti.style.left = `${Math.random() * 100}%`;
+        confetti.style.top = `${Math.random() * 20 - 10}%`; // Start slightly above or at top
         confetti.style.animationDuration = `${2 + Math.random() * 2}s`;
+        confetti.style.animationDelay = `${Math.random() * 0.5}s`;
         confetti.style.backgroundColor = getRandomColor();
         celebration.appendChild(confetti);
     }
@@ -7738,19 +7679,23 @@ function showCelebration() {
     }, 4000);
 }
 
-// Helper functions
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
-
 function getRandomColor() {
-    const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+    const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#8800ff'];
     return colors[Math.floor(Math.random() * colors.length)];
 }
+
+// Helper functions
+function shuffleArray(array) {
+    const shuffled = [...array]; // Create a copy to avoid modifying original
+    
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; // Swap elements
+    }
+    
+    return shuffled;
+}
+
 </script>
 </body>
 </html>
