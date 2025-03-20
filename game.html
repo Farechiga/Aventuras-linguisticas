@@ -5,86 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>¡Aventuras lingüísticas!</title>
     <style>
-    /* Global Styles */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive, sans-serif;
-    }
-    
-    body {
-        background-color: #f9f0e8;
-        overflow-x: hidden;
-    }
- 
-/* Gradient on left and right edges */
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    top: 0;
-    width: 15vw; /* Adjusts gradient width */
-    height: 100vh;
-    pointer-events: none;
-    z-index: 1; /* Ensure it overlays correctly */
-}
-
-body::before {
-    left: 0;
-    background: linear-gradient(to right, rgba(0, 9, 33, 0.3), rgba(0, 9, 33, 0));
-}
-
-body::after {
-    right: 0;
-    background: linear-gradient(to left, rgba(0, 9, 33, 0.3), rgba(0, 9, 33, 0));
-}
-
-    /* Game Page Styles */
-    .game-container {
-        width: 100vw;
-        min-height: 100vh;
-        padding: 20px;
-        background: linear-gradient(45deg, #7ABFFF, #8CA9F2, #9B93E7, #B07BDC, #C462D0, #DA47C3);
-        background-size: 400% 400%;
-        animation: gradient 15s ease infinite;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-    
-    @keyframes gradient {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-
-    /* Improved SVG overlay positioning */
-    .svg-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: 0;
-        opacity: 0.15; /* Kept your original opacity setting */
-    }
-
-.svg-overlay svg {
-    width: 100vw;
-    height: 100vh;
-}
-
-    /* Make sure other content is positioned above the SVG */
-    .score-container, .home-button, .manuscript {
-        position: relative;
-        z-index: 1;
-    }
-
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive, sans-serif;
+        }
+        
+        body {
+            background-color: #f9f0e8;
+            overflow-x: hidden;
+        }
+        
+        /* Gradient on left and right edges */
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            width: 15vw; /* Adjusts gradient width */
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1; /* Ensure it overlays correctly */
+        }
+        
+        body::before {
+            left: 0;
+            background: linear-gradient(to right, rgba(0, 9, 33, 0.3), rgba(0, 9, 33, 0));
+        }
+        
+        body::after {
+            right: 0;
+            background: linear-gradient(to left, rgba(0, 9, 33, 0.3), rgba(0, 9, 33, 0));
+        }
+        
+        /* Game Page Styles */
+        .game-container {
+            width: 100vw;
+            min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(45deg, #7ABFFF, #8CA9F2, #9B93E7, #B07BDC, #C462D0, #DA47C3);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Improved SVG overlay positioning */
+        .svg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.15; /* Kept your original opacity setting */
+        }
+        
+        .svg-overlay svg {
+            width: 100vw;
+            height: 100vh;
+        }
+        
         /* Make sure other content is positioned above the SVG */
         .score-container, .home-button, .manuscript {
             position: relative;
@@ -110,16 +104,17 @@ body::after {
         }
         
         .manuscript {
-            width: 90%;
-            max-width: 600px;
-            margin: 20px auto;
-            background-color: rgba(255, 251, 240, 0.92);
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            position: relative;
-            overflow: hidden;
-            border-radius: 20px;
-        }
+          width: 90%;
+    max-width: 900px;
+    margin: 20px auto;
+    background-color: #e8e6dc;
+    padding: 25px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px;
+    border: 1px solid white;
+}
         
         .manuscript::before {
             content: "";
@@ -134,44 +129,34 @@ body::after {
             background-size: cover;
         }
         
-.instruction-text {
-    text-align: center;
+        .instruction-text {
+          text-align: center;
     color: purple;
     font-size: 1.3rem;
     margin-bottom: 15px;
     font-weight: bold;
+    padding: 0 15px;
 }
-
-        .character-image {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 20px;
-            display: block;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            animation: pulse 2s infinite;
-        }
         
         .english-sentence {
-            font-size: 1.4rem;
-            color: #333;
-            text-align: center;
-            margin-bottom: 25px;
-            padding: 15px;
-            border-radius: 15px;
-            background-color: rgba(255, 255, 255, 0.7);
-            font-weight: 500;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            line-height: 1.4;
-        }
+          font-size: 1.4rem;
+    color: #000;
+    text-align: center;
+    margin: 15px 0;
+    padding: 15px;
+    font-weight: 500;
+    line-height: 1.4;
+}
         
         .spanish-options {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 25px;
-        }
+          display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 25px;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
         
         .spanish-option {
             font-size: 1.2rem;
@@ -253,6 +238,181 @@ body::after {
         @keyframes confetti-fall {
             0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
             100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        /* Modal Overlay for Matching Game */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .matching-modal {
+            width: 90%;
+            max-width: 600px;
+            background-color: rgba(255, 251, 240, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+        
+        .modal-title {
+            text-align: center;
+            color: purple;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .original-sentence {
+            text-align: center;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            color: #333;
+            border: 2px dashed #8a64ba;
+        }
+        
+        .matching-area {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .component-title {
+            font-weight: bold;
+            color: #8a64ba;
+            margin-bottom: 5px;
+        }
+        
+        .match-container {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .match-container .english-component {
+            flex: 1;
+            margin-right: 15px;
+            background-color: #85296a;
+            color: white;
+            border: 2px solid #6a2055;
+            border-radius: 10px;
+            padding: 12px;
+        }
+        
+        .match-container .spanish-dropzone {
+            flex: 1;
+            background-color: #d9c7d6;
+            border: 2px dashed #85296a;
+            border-radius: 10px;
+            padding: 12px;
+            min-height: 50px;
+            transition: all 0.3s;
+        }
+        
+        .spanish-dropzone.highlight {
+            background-color: #c4a0be;
+            border-style: solid;
+        }
+        
+        .spanish-options-matching {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 10px;
+            justify-content: center;
+        }
+        
+        .draggable {
+            cursor: grab;
+            background-color: #3e3364;
+            color: white;
+            border: 2px solid #2a234a;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        
+        .draggable:hover {
+            background-color: #4e4174;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .draggable:active {
+            cursor: grabbing;
+        }
+        
+        .draggable.dragging {
+            opacity: 0.5;
+        }
+        
+        .draggable.speaking {
+            background-color: #604c8d;
+        }
+        
+        .check-matches-btn {
+            background-color: #85296a;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 200px;
+            align-self: center;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        .check-matches-btn:hover {
+            background-color: #6a2055;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .check-matches-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result-message {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+            color: green;
+            height: 24px;
+        }
+        
+        .correct-match {
+            background-color: #aaffaa !important;
+            border-color: green !important;
+            animation: correct-answer 0.5s;
+        }
+        
+        .incorrect-match {
+            background-color: #ffaaaa !important;
+            border-color: red !important;
+            animation: shake 0.5s;
         }
     </style>
 </head>
@@ -374,174 +534,54 @@ body::after {
         <div class="score-container">
             Score: <span class="correct-count">0</span>
         </div>
-        
+
         <div class="manuscript">
-            <div class="character-image" id="current-character"></div>
-            
-            <div class="instruction-text">Seraphina please help the character choose the correct Spanish translation!</div>
-        
-            <div class="english-sentence" id="english-text">
-                Loading question...
-            </div>
+          <div class="instruction-text">Seraphina please help the character choose the correct Spanish translation!</div>
+          <div class="english-sentence" id="english-text">Loading question...</div>
+      </div>
             
             <div class="spanish-options" id="spanish-options">
                 <!-- Options will be dynamically added here -->
             </div>
-            
-            <!-- Add these two div elements right here -->
-            <div id="segment-container"></div>
-            <div id="drop-zones-container"></div>
-            <!-- End of added elements -->
         </div>
-    
+    </div>
+    <!-- Modal for Matching Game -->
+<div class="modal-overlay" id="matching-modal-overlay">
+    <div class="matching-modal">
+        <div class="modal-title">¡Match the sentence parts!</div>
+        
+        <div class="original-sentence" id="original-sentence">
+            <!-- Original Spanish sentence will go here -->
+        </div>
+        
+        <div class="matching-area">
+            <div>
+                <div class="component-title">Match Spanish phrases to English translations:</div>
+                <div class="english-components" id="english-components">
+                    <!-- English components and dropzones will go here -->
+                </div>
+            </div>
+            
+            <div>
+                <div class="component-title">Drag and Drop the Spanish Phrases:</div>
+                <div class="spanish-options-matching" id="spanish-options-matching">
+                    <!-- Spanish draggable components will go here -->
+                </div>
+            </div>
+            
+            <div class="result-message" id="match-result-message"></div>
+            
+            <div class="controls">
+                <button class="check-matches-btn" id="check-matches-btn">Check Matches</button>
+            </div>
+        </div>
+    </div>
+</div>
     <!-- Celebration overlay -->
     <div class="celebration" id="celebration"></div>
     
     <script>
-// Global state variables
-let translationData = [];
-let selectedCharacter = null;
-let currentCorrectOption = null;
-let correctCount = 0;
-
-// DOM element references
-let segmentContainer;
-let dropZonesContainer;
-let spanishOptions;
-let celebration;
-let correctCountDisplay;
-let englishText;
-
-// Place the DOMContentLoaded event listener here, at the very beginning
-window.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM Content Loaded - initializing game");
-    
-    // Get DOM element references
-    englishText = document.getElementById('english-text');
-    spanishOptions = document.getElementById('spanish-options');
-    segmentContainer = document.getElementById('segment-container');
-    dropZonesContainer = document.getElementById('drop-zones-container');
-    celebration = document.getElementById('celebration');
-    correctCountDisplay = document.querySelector('.correct-count');
-    
-    // Load the voices first (this can be asynchronous in some browsers)
-    if (window.speechSynthesis) {
-        // Pre-load the voices
-        window.speechSynthesis.getVoices();
-        
-        // In Chrome and some other browsers, voices are loaded asynchronously
-        if (speechSynthesis.onvoiceschanged !== undefined) {
-            speechSynthesis.onvoiceschanged = function() {
-                // Voices are now loaded
-                console.log("Voices loaded:", window.speechSynthesis.getVoices().length);
-            };
-        }
-    }
-    
-    // Add event delegation for English segments
-    document.addEventListener('click', function(event) {
-        if (event.target.classList.contains('english-segment')) {
-            handleEnglishSegmentClick(event.target);
-        }
-    });
-    
-    // Initialize game
-    loadQuestion();
-});
-
-function loadQuestion() {
-    console.log("Loading a question...");
-    
-    // Ensure translation data is loaded
-    if (!translationData || translationData.length === 0) {
-        console.error("Translation data not loaded yet");
-        return;
-    }
-    
-    // Clear any previous feedback
-    const existingHint = document.querySelector('.translation-hint');
-    if (existingHint) existingHint.remove();
-    
-    // Remove previous selection classes
-    document.querySelectorAll('.spanish-option').forEach(option => {
-        option.classList.remove('correct', 'incorrect', 'selected');
-    });
-    
-    // Get a random character
-    const randomIndex = Math.floor(Math.random() * translationData.length);
-    selectedCharacter = translationData[randomIndex];
-    
-    // Set character image if available
-    const characterImage = document.getElementById('current-character');
-    if (characterImage) {
-        characterImage.style.backgroundImage = `url('images/${selectedCharacter.character.toLowerCase()}.png')`;
-    }
-    
-    // Get a random sentence from this character
-    const sentences = selectedCharacter.sentences;
-    const randomSentenceIndex = Math.floor(Math.random() * sentences.length);
-    const selectedSentence = sentences[randomSentenceIndex];
-    
-    // Display the English sentence
-    if (englishText) {
-        englishText.textContent = selectedSentence.english;
-    } else {
-        console.error("English text element not found");
-    }
-    
-    // Get correct Spanish translation
-    currentCorrectOption = selectedSentence.spanish;
-    
-    // Get incorrect options
-    const incorrectOptions = getRandomIncorrectOptions(selectedCharacter, randomIndex, randomSentenceIndex);
-    
-    // Combine and shuffle options
-    const allOptions = [currentCorrectOption, ...incorrectOptions];
-    const shuffledOptions = shuffleArray(allOptions);
-    
-    // Display options
-    if (spanishOptions) {
-        spanishOptions.innerHTML = '';
-        
-        shuffledOptions.forEach(option => {
-            const optionButton = document.createElement('div');
-            optionButton.className = 'spanish-option';
-            optionButton.textContent = option;
             
-            optionButton.addEventListener('click', function() {
-                checkAnswer(option, this);
-            });
-            
-            spanishOptions.appendChild(optionButton);
-        });
-    } else {
-        console.error("Spanish options element not found");
-    }
-}
-
-// Your other functions...
-
-// Your translation data should also be defined OUTSIDE the event listener
-const translationData = [
-    // Your translation data here
-];
-
-// Global variables for tracking state
-let currentCharacterIndex = -1; // Start with an invalid index
-let currentSentenceIndex = -1;
-let currentCorrectOption = '';
-let recentlyUsedQuestions = [];
-const maxRecentQuestions = 10;
-let selectedCharacter = null; // Add this
-let correctCount = 0; // Add this
-        
-        // DOM elements
-        const englishText = document.getElementById('english-text');
-        const spanishOptions = document.getElementById('spanish-options');
-        const correctCountDisplay = document.querySelector('.correct-count');
-        const celebration = document.getElementById('celebration');
-
-        
         // Translation data
         const translationData = [
     // Belle
@@ -6789,8 +6829,8 @@ sentences: [
     english: "Timmy alerted them to hidden cave entrances using smell.",
     spanish: "Timmy les alertó de entradas ocultas a cuevas mediante olfato.",
     segments: {
-      spanish: ["Timmy", "les alertó", "de entradas ocultas", "a cuevas mediante olfato."],
-      english: ["Timmy", "alerted them", "using smell", "to hidden cave entrances."]
+      spanish: ["Timmy", "les alertó", "de entradas ocultas a cuevas", "mediante olfato."],
+      english: ["Timmy", "alerted them", "to hidden cave entrances", "using smell."]
     }
   },
   {
@@ -7004,637 +7044,266 @@ sentences: [
     ]
   }
 ];
-        
-    // Just log the existing data
-    console.log("Translation data loaded with", translationData.length, "characters");
-// Initialize game
-loadQuestion();
-});
+    
+    // Game state variables
+let recentlyUsedQuestions = [];
+let currentSentenceIndex = 0;
+let correctCount = 0;
+let currentCorrectOption = null;
+let recentlyUsedCharacters = [];
+let currentCharacterIndex = -1;
+const maxRecentQuestions = 20; // Adjust as needed
+const maxRecentCharacters = 3; // Prevents last 3 characters from repeating
 
-            // Load the voices first (this can be asynchronous in some browsers)
-            if (window.speechSynthesis) {
-                // Pre-load the voices
-                window.speechSynthesis.getVoices();
-                
-                // In Chrome and some other browsers, voices are loaded asynchronously
-                if (speechSynthesis.onvoiceschanged !== undefined) {
-                    speechSynthesis.onvoiceschanged = function() {
-                        // Voices are now loaded
-                        console.log("Voices loaded:", window.speechSynthesis.getVoices().length);
-                    };
-                }
-            }
+// Add this right after your variable declarations (around line 7057)
+// This is a simplified emergency fix
+
+function quickFindCharactersInData() {
+  // Get direct character references from the data
+  const characterEntries = [];
+  
+  // Check if translationData is available and is an array
+  if (!translationData || !Array.isArray(translationData)) {
+    console.error("translationData is not properly defined");
+    return [];
+  }
+  
+  // Step 1: Find top-level character blocks
+  for (let i = 0; i < translationData.length; i++) {
+    const item = translationData[i];
     
-    // Add basic event handlers if they don't exist
-    // These should be properly implemented based on your needs
-    if (typeof handleDragStart !== 'function') {
-        window.handleDragStart = function(e) {
-            e.dataTransfer.setData('text/plain', e.target.dataset.segment);
-            e.target.classList.add('dragging');
-        };
+    // Look for items with both character and sentences
+    if (item && item.character && item.sentences && Array.isArray(item.sentences)) {
+      characterEntries.push({
+        name: item.character,
+        index: i,
+        sentences: item.sentences
+      });
+      console.log(`Found character: ${item.character} with ${item.sentences.length} sentences`);
     }
+  }
+  
+  // If we found characters, we're done
+  if (characterEntries.length > 0) {
+    console.log(`Found ${characterEntries.length} character blocks`);
+    return characterEntries;
+  }
+  
+  // Step 2: If no characters found, try the brute force approach
+  // Find all items that have sentences and treat them as separate characters
+  let characterCounter = 0;
+  for (let i = 0; i < translationData.length; i++) {
+    // Check if this item has sentences directly
+    if (translationData[i] && translationData[i].sentences && Array.isArray(translationData[i].sentences)) {
+      characterCounter++;
+      characterEntries.push({
+        name: `Character ${characterCounter}`,
+        index: i,
+        sentences: translationData[i].sentences
+      });
+      console.log(`Found unlabeled character at index ${i} with ${translationData[i].sentences.length} sentences`);
+    }
+  }
+  
+  console.log(`Emergency mode: Found ${characterEntries.length} character blocks`);
+  return characterEntries;
+}
+
+// Replace your getNewCharacterIndex function with this emergency version
+function getNewCharacterIndex() {
+  // Create character cache if it doesn't exist
+  if (!window.characterCache) {
+    window.characterCache = quickFindCharactersInData();
+    if (window.characterCache.length === 0) {
+      console.error("NO CHARACTERS FOUND! Check the structure of translationData");
+      return 0; // Return first index as fallback
+    }
+  }
+  
+  // Get random character index
+  const randomCharIndex = Math.floor(Math.random() * window.characterCache.length);
+  const selectedCharacter = window.characterCache[randomCharIndex];
+  
+  console.log(`Selected character: ${selectedCharacter.name}`);
+  return selectedCharacter.index;
+}
+
+// Update how the question is loaded - this minimal version focuses on the key issue
+function loadQuestion() {
+  console.log("Loading new question...");
+  
+  // Remove any existing translation hint
+  const existingHint = document.querySelector('.translation-hint');
+  if (existingHint) {
+    existingHint.remove();
+  }
+  
+  // Step 1: Get a character
+  const characterIndex = getNewCharacterIndex();
+  const characterData = translationData[characterIndex];
+  
+  console.log(`Using character at index ${characterIndex}`);
+  
+  // Check if we have a valid character with sentences
+  if (!characterData || !characterData.sentences || !Array.isArray(characterData.sentences) || characterData.sentences.length === 0) {
+    console.error("Invalid character or no sentences found");
+    return; // Prevent errors if no valid data
+  }
+  
+  // Step 2: Get a random sentence from this character
+  const sentenceIndex = Math.floor(Math.random() * characterData.sentences.length);
+  const sentenceData = characterData.sentences[sentenceIndex];
+  
+  console.log(`Selected sentence ${sentenceIndex} out of ${characterData.sentences.length}`);
+  
+  // Update current indices
+  currentCharacterIndex = characterIndex;
+  currentSentenceIndex = sentenceIndex;
+  
+  // Step 3: Display the question
+  const englishText = document.getElementById('english-text');
+  if (englishText && sentenceData.english) {
+    englishText.textContent = sentenceData.english;
+  } else {
+    console.error("English text element not found or sentence has no English text");
+    return;
+  }
+  
+  // Set correct option
+  currentCorrectOption = sentenceData.spanish;
+  
+  // Get random incorrect options (using existing function)
+  const incorrectOptions = getRandomIncorrectOptions(characterData, currentSentenceIndex);
+  
+  // Combine and shuffle options
+  const options = [currentCorrectOption, ...incorrectOptions];
+  shuffleArray(options);
+  
+  // Display options
+  const spanishOptions = document.getElementById('spanish-options');
+  if (spanishOptions) {
+    spanishOptions.innerHTML = '';
     
-    if (typeof handleDragEnd !== 'function') {
-        window.handleDragEnd = function(e) {
-            e.target.classList.remove('dragging');
-        };
-    }
-    
-    if (typeof handleDragOver !== 'function') {
-        window.handleDragOver = function(e) {
-            e.preventDefault();
-        };
-    }
-    
-    if (typeof handleDragEnter !== 'function') {
-        window.handleDragEnter = function(e) {
-            e.preventDefault();
-            e.target.classList.add('drag-over');
-        };
-    }
-    
-    if (typeof handleDragLeave !== 'function') {
-        window.handleDragLeave = function(e) {
-            e.target.classList.remove('drag-over');
-        };
-    }
-    
-    if (typeof handleDrop !== 'function') {
-        window.handleDrop = function(e) {
-            e.preventDefault();
-            e.target.classList.remove('drag-over');
-            const segment = e.dataTransfer.getData('text/plain');
-            const correctSegment = e.target.getAttribute('data-correct-segment');
-            
-            if (segment === correctSegment) {
-                e.target.textContent = segment;
-                e.target.classList.add('correct-drop');
-                document.querySelector(`[data-segment="${segment}"]`).style.display = 'none';
-            }
-        };
-    }
-    
-    if (typeof handleEnglishSegmentClick !== 'function') {
-        window.handleEnglishSegmentClick = function(element, state) {
-            console.log("English segment clicked", element, state);
-            // Implement based on your requirements
-        };
-    }
-});
-        
-// Updated getRandomIncorrectOptions function
-function getRandomIncorrectOptions(characterData, currentCharacterIndex, currentSentenceIndex) {
+    options.forEach(option => {
+      const optionElement = document.createElement('div');
+      optionElement.className = 'spanish-option';
+      optionElement.textContent = option;
+      
+      // Add click event listeners
+      optionElement.addEventListener('click', function() {
+        checkAnswer(option, this);
+      });
+      
+      optionElement.addEventListener('click', function() {
+        speakSpanishText(option);
+      });
+      
+      spanishOptions.appendChild(optionElement);
+    });
+  }
+}
+
+// Get random incorrect options from other sentences
+function getRandomIncorrectOptions(characterData, currentIndex) {
     // Create a pool of all sentences excluding the current one
     let sentencePool = [];
     
-    // Add sentences from other characters
-    translationData.forEach((charData, charIdx) => {
-        if (charIdx !== currentCharacterIndex) {
-            charData.sentences.forEach(sentence => {
-                sentencePool.push(sentence.spanish);
+    // Add sentences from other characters first (to increase variety)
+    translationData.forEach((charData, idx) => {
+        if (idx !== currentCharacterIndex) {
+            // Give priority to characters we haven't used recently
+            sentencePool = sentencePool.concat(charData.sentences.map(sentence => ({
+                spanish: sentence.spanish,
+                weight: recentlyUsedCharacters.includes(idx) ? 1 : 3
+            })));
+        }
+    });
+    
+    // Add sentences from the current character (except the current sentence)
+    characterData.sentences.forEach((sentence, idx) => {
+        if (idx !== currentIndex) {
+            sentencePool.push({
+                spanish: sentence.spanish,
+                weight: 1
             });
         }
     });
     
-    // Add sentences from current character (except current sentence)
-    characterData.sentences.forEach((sentence, idx) => {
-        if (idx !== currentSentenceIndex) {
-            sentencePool.push(sentence.spanish);
-        }
-    });
-    
-    // Shuffle the pool and take the first 2
+    // Shuffle the pool
     shuffleArray(sentencePool);
     
-    return sentencePool.slice(0, 2);
-}
-
-// Updated shuffleArray function to ensure proper randomization
-function shuffleArray(array) {
-    // Make a copy to avoid modifying the original
-    const shuffled = [...array];
-    
-    // Fisher-Yates shuffle algorithm
-    for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    // Select options with weighted probability
+    const selected = [];
+    while (selected.length < 2 && sentencePool.length > 0) {
+        // Remove and get item from pool
+        const item = sentencePool.shift();
+        
+        // Higher weight = higher chance to be selected
+        if (Math.random() * 3 <= item.weight) {
+            selected.push(item.spanish);
+        } else if (sentencePool.length <= 2 - selected.length) {
+            // If we're running out of options, just use what we have
+            selected.push(item.spanish);
+        } else if (selected.length === 0 && sentencePool.length <= 1) {
+            selected.push(item.spanish);
+        }
     }
     
-    return shuffled;
+    // If we didn't get enough selections, just take the first items from the pool
+    while (selected.length < 2 && sentencePool.length > 0) {
+        selected.push(sentencePool.shift().spanish);
+    }
+    
+    return selected;
 }
 
-// Function to show segment matching game after selecting correct translation
-function showSegmentMatchingGame(sentenceData) {
-    // Clear previous options
-    spanishOptions.innerHTML = '';
-    
-    // Create a modal-style matching container
-    const modalOverlay = document.createElement('div');
-    modalOverlay.className = 'modal-overlay';
-    
-    const matchingModal = document.createElement('div');
-    matchingModal.className = 'matching-modal';
-    
-    // Add title
-    const modalTitle = document.createElement('div');
-    modalTitle.className = 'modal-title';
-    modalTitle.textContent = '¡Match the sentence parts!';
-    matchingModal.appendChild(modalTitle);
-    
-    // Show the original Spanish sentence
-    const originalSentence = document.createElement('div');
-    originalSentence.className = 'original-sentence';
-    originalSentence.textContent = sentenceData.spanish;
-    matchingModal.appendChild(originalSentence);
-    
-    // Create the matching area
-    const matchingArea = document.createElement('div');
-    matchingArea.className = 'matching-area';
-    
-    // Create the matching container section
-    const matchingSection = document.createElement('div');
-    
-    // Add title for the matching section
-    const componentTitle = document.createElement('div');
-    componentTitle.className = 'component-title';
-    componentTitle.textContent = 'Match Spanish phrases to English translations:';
-    matchingSection.appendChild(componentTitle);
-    
-    // Create the English components container
-    const englishComponentsContainer = document.createElement('div');
-    englishComponentsContainer.className = 'english-components';
-    
-    // Get English and Spanish segments
-    const englishSegments = sentenceData.segments.english;
-    const spanishSegments = sentenceData.segments.spanish;
-    
-    // Create match containers for each segment
-    englishSegments.forEach((segment, index) => {
-        const matchContainer = document.createElement('div');
-        matchContainer.className = 'match-container';
-        
-        // Create English component
-        const englishComponent = document.createElement('div');
-        englishComponent.className = 'english-component';
-        englishComponent.textContent = segment;
-        
-        // Create Spanish dropzone
-        const spanishDropzone = document.createElement('div');
-        spanishDropzone.className = 'spanish-dropzone';
-        spanishDropzone.dataset.correct = spanishSegments[index];
-        
-        // Add dragover event
-        spanishDropzone.addEventListener('dragover', e => {
-            e.preventDefault();
-            spanishDropzone.classList.add('highlight');
-        });
-        
-        // Add dragleave event
-        spanishDropzone.addEventListener('dragleave', () => {
-            spanishDropzone.classList.remove('highlight');
-        });
-        
-        // Add drop event
-        spanishDropzone.addEventListener('drop', e => {
-            e.preventDefault();
-            spanishDropzone.classList.remove('highlight');
-            
-            // If dropzone already has content, return that to options
-            if (spanishDropzone.children.length > 0) {
-                const existingDraggable = spanishDropzone.children[0];
-                document.querySelector('.spanish-options').appendChild(existingDraggable);
-            }
-            
-            // Get the dragged element
-            const draggedElement = document.querySelector('.draggable.dragging');
-            if (draggedElement) {
-                spanishDropzone.appendChild(draggedElement);
-                
-                // Pronounce the Spanish phrase when dropped
-                speakSpanishText(draggedElement.textContent);
-            }
-        });
-        
-        // Add to match container
-        matchContainer.appendChild(englishComponent);
-        matchContainer.appendChild(spanishDropzone);
-        
-        // Add to English components container
-        englishComponentsContainer.appendChild(matchContainer);
-    });
-    
-    // Add English components to matching section
-    matchingSection.appendChild(englishComponentsContainer);
-    matchingArea.appendChild(matchingSection);
-    
-    // Create Spanish options section
-    const spanishOptionsSection = document.createElement('div');
-    
-    // Add title for Spanish options
-    const spanishTitle = document.createElement('div');
-    spanishTitle.className = 'component-title';
-    spanishTitle.textContent = 'Drag and Drop the Spanish Phrases:';
-    spanishOptionsSection.appendChild(spanishTitle);
-    
-    // Create Spanish options container
-    const spanishDraggablesContainer = document.createElement('div');
-    spanishDraggablesContainer.className = 'spanish-options';
-    
-    // Create shuffled array of Spanish segments
-    const shuffledSpanishSegments = [...spanishSegments];
-    shuffleArray(shuffledSpanishSegments);
-    
-    // Add Spanish draggable options
-    shuffledSpanishSegments.forEach(segment => {
-        const draggable = document.createElement('div');
-        draggable.className = 'draggable';
-        draggable.textContent = segment;
-        draggable.draggable = true;
-        
-        // Add dragstart event
-        draggable.addEventListener('dragstart', () => {
-            draggable.classList.add('dragging');
-        });
-        
-        // Add dragend event
-        draggable.addEventListener('dragend', () => {
-            draggable.classList.remove('dragging');
-        });
-        
-        // Add click event for pronunciation
-        draggable.addEventListener('click', () => {
-            speakSpanishText(draggable.textContent);
-        });
-        
-        // Add to Spanish options container
-        spanishDraggablesContainer.appendChild(draggable);
-    });
-    
-    // Add Spanish options to Spanish section
-    spanishOptionsSection.appendChild(spanishDraggablesContainer);
-    matchingArea.appendChild(spanishOptionsSection);
-    
-    // Add result message
-    const resultMessage = document.createElement('div');
-    resultMessage.className = 'result-message';
-    matchingArea.appendChild(resultMessage);
-    
-    // Add controls
-    const controls = document.createElement('div');
-    controls.className = 'controls';
-    
-    // Add check matches button
-    const checkButton = document.createElement('button');
-    checkButton.className = 'continue-button';
-    checkButton.id = 'check-matches-btn';
-    checkButton.textContent = 'Check Matches';
-    
-    // Add click event for check button
-    checkButton.addEventListener('click', () => {
-        const dropzones = document.querySelectorAll('.spanish-dropzone');
-        let allCorrect = true;
-        let allFilled = true;
-        
-        dropzones.forEach(dropzone => {
-            // Remove previous validation classes
-            dropzone.classList.remove('correct-match', 'incorrect-match');
-            
-            const correctText = dropzone.dataset.correct;
-            
-            // Check if there's a match in the dropzone
-            if (dropzone.children.length > 0) {
-                const droppedText = dropzone.children[0].textContent;
-                
-                if (droppedText === correctText) {
-                    // Correct match
-                    dropzone.classList.add('correct-match');
-                } else {
-                    // Incorrect match
-                    dropzone.classList.add('incorrect-match');
-                    allCorrect = false;
-                }
-            } else {
-                // No match provided
-                allFilled = false;
-            }
-        });
-        
-        // Update result message and button
-        if (!allFilled) {
-            resultMessage.textContent = "Please match all phrases before checking.";
-            resultMessage.style.color = "blue";
-        } else if (allCorrect) {
-            resultMessage.textContent = "¡Excelente! All matches are correct!";
-            resultMessage.style.color = "green";
-            checkButton.textContent = "Continue";
-            
-            // Change button action to load next question
-            checkButton.onclick = () => {
-                // Speak the full sentence
-                speakSpanishText(sentenceData.spanish, function() {
-                    // Move to next question after a brief delay
-                    setTimeout(loadQuestion, 1000);
-                });
-            };
-            
-            // Show celebration
-            showCelebration();
-        } else {
-            resultMessage.textContent = "Try again! Some matches are incorrect.";
-            resultMessage.style.color = "red";
-        }
-    });
-    
-    controls.appendChild(checkButton);
-    matchingArea.appendChild(controls);
-    
-    // Add matching area to modal
-    matchingModal.appendChild(matchingArea);
-    
-    // Add modal to overlay
-    modalOverlay.appendChild(matchingModal);
-    
-    // Add overlay to options
-    spanishOptions.appendChild(modalOverlay);
-    
-    // Add CSS for drag and drop matching
-    addDragDropStyles();
-}
-
-// Add CSS styles for the drag and drop matching
-function addDragDropStyles() {
-    // Check if styles already exist
-    if (document.getElementById('drag-drop-styles')) return;
-    
-    const style = document.createElement('style');
-    style.id = 'drag-drop-styles';
-    style.textContent = `
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        
-        .matching-modal {
-            width: 90%;
-            max-width: 600px;
-            background-color: rgba(255, 251, 240, 0.95);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.4);
-            position: relative;
-        }
-        
-        .modal-title {
-            text-align: center;
-            color: purple;
-            font-size: 1.3rem;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-        
-        .original-sentence {
-            text-align: center;
-            padding: 15px;
-            background-color: rgba(255, 255, 255, 0.6);
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-            color: #333;
-            border: 2px dashed #8a64ba;
-        }
-        
-        .matching-area {
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-        }
-        
-        .english-components, .spanish-dropzones {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .component-title {
-            font-weight: bold;
-            color: #8a64ba;
-            margin-bottom: 5px;
-        }
-        
-        .english-component {
-            background-color: #85296a;
-            color: white;
-            border: 2px solid #6a2055;
-            border-radius: 10px;
-            padding: 12px;
-            margin: 5px 0;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        
-        .spanish-dropzone {
-            background-color: #d9c7d6;
-            border: 2px dashed #85296a;
-            border-radius: 10px;
-            padding: 12px;
-            margin: 5px 0;
-            min-height: 50px;
-            transition: all 0.3s;
-        }
-        
-        .spanish-dropzone.highlight {
-            background-color: #c4a0be;
-            border-style: solid;
-        }
-        
-        .match-container {
-            display: flex;
-            margin-bottom: 15px;
-        }
-        
-        .match-container .english-component {
-            flex: 1;
-            margin-right: 15px;
-        }
-        
-        .match-container .spanish-dropzone {
-            flex: 1;
-        }
-        
-        .draggable {
-            cursor: grab;
-            background-color: #3e3364;
-            color: white;
-            border: 2px solid #2a234a;
-            border-radius: 10px;
-            padding: 10px;
-            margin: 5px;
-            transition: all 0.3s;
-        }
-        
-        .draggable:hover {
-            background-color: #4e4174;
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        
-        .draggable:active {
-            cursor: grabbing;
-        }
-        
-        .draggable.dragging {
-            opacity: 0.5;
-        }
-        
-        .draggable.speaking {
-            background-color: #604c8d;
-        }
-        
-        .spanish-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 20px;
-            padding: 15px;
-            background-color: rgba(255, 255, 255, 0.6);
-            border-radius: 10px;
-            justify-content: center;
-        }
-        
-        .continue-button {
-            background-color: #85296a;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 12px 25px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 20px;
-            width: 100%;
-            max-width: 200px;
-            align-self: center;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-        }
-        
-        .continue-button:hover {
-            background-color: #6a2055;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
-        }
-        
-        .continue-button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .result-message {
-            text-align: center;
-            margin-top: 15px;
-            font-weight: bold;
-            color: green;
-            height: 24px;
-        }
-        
-        .controls {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        
-        .correct-match {
-            background-color: #aaffaa !important;
-            border-color: green !important;
-            animation: correct-answer 0.5s;
-        }
-        
-        .incorrect-match {
-            background-color: #ffaaaa !important;
-            border-color: red !important;
-            animation: shake 0.5s;
-        }
-        
-        @media (max-width: 600px) {
-            .matching-area {
-                gap: 20px;
-            }
-            
-            .spanish-dropzone, .english-component, .draggable {
-                padding: 8px;
-                font-size: 0.9rem;
-            }
-            
-            .modal-title {
-                font-size: 1.1rem;
-            }
-        }
-    `;
-    
-    document.head.appendChild(style);
-}
-
-function checkAnswer(selectedOption, buttonElement) {
-    console.log("Checking answer:", selectedOption);
-    
-    // Remove any previously selected options
-    document.querySelectorAll('.spanish-option.selected').forEach(el => {
-        el.classList.remove('selected');
-    });
-    
-    // Mark this option as selected
-    buttonElement.classList.add('selected');
+// Check if the answer is correct
+function checkAnswer(selectedOption, selectedElement) {
+    // Speak the text first
+    speakSpanishText(selectedOption);
     
     if (selectedOption === currentCorrectOption) {
-        // Correct answer
-        buttonElement.classList.add('correct');
+        selectedElement.classList.add('correct');
         correctCount++;
-        
-        // Update score display
+        const correctCountDisplay = document.querySelector('.correct-count');
         if (correctCountDisplay) {
             correctCountDisplay.textContent = correctCount;
         }
-        
+
         // Show celebration animation
         showCelebration();
         
-        // Speak the correct Spanish sentence
-        speakSpanishText(currentCorrectOption, function() {
-            // Load next question after delay and speech
-            setTimeout(loadQuestion, 1500);
-        });
+        // Show the matching game after a delay
+        setTimeout(() => {
+            showMatchingGame();
+        }, 2000); // Longer delay to ensure speech finishes
     } else {
         // Incorrect answer
-        buttonElement.classList.add('incorrect');
+        selectedElement.classList.add('incorrect');
         
-        // Add hint if available
+        // Find the English translation for this incorrect Spanish option
         let translationFound = false;
         
+        // Search through all characters and sentences
         for (const character of translationData) {
             for (const sentence of character.sentences) {
                 if (sentence.spanish === selectedOption) {
-                    const hintElement = document.createElement('div');
-                    hintElement.className = 'translation-hint';
+                    // Create or update translation hint
+                    let hintElement = document.querySelector('.translation-hint');
+                    if (!hintElement) {
+                        hintElement = document.createElement('div');
+                        hintElement.className = 'translation-hint';
+                        const spanishOptions = document.getElementById('spanish-options');
+                        if (spanishOptions) {
+                            spanishOptions.insertAdjacentElement('afterend', hintElement);
+                        }
+                    }
+                    
                     hintElement.innerHTML = `
-                        <p><strong>This actually means:</strong></p>
-                        <p>"${sentence.english}"</p>
-                        <p>Try again!</p>
+                    <p><strong>This actually means:</strong></p>
+                    <p>"${sentence.english}"</p>
+                    <p>Try again to find the correct match!</p>
                     `;
-                    
-                    // Remove any existing hint
-                    const existingHint = document.querySelector('.translation-hint');
-                    if (existingHint) existingHint.remove();
-                    
-                    // Add new hint
-                    spanishOptions.insertAdjacentElement('afterend', hintElement);
                     
                     translationFound = true;
                     break;
@@ -7643,20 +7312,307 @@ function checkAnswer(selectedOption, buttonElement) {
             if (translationFound) break;
         }
         
-        // Remove incorrect class after animation
+        // Remove the incorrect class after animation finishes
         setTimeout(function() {
-            buttonElement.classList.remove('incorrect');
+            selectedElement.classList.remove('incorrect');
         }, 500);
     }
 }
 
-function showCelebration() {
-    console.log("Showing celebration!");
+// Function to show the matching game
+function showMatchingGame() {
+    console.log("Showing matching game...");
     
-    if (!celebration) {
-        console.error("Celebration element not found");
+    const characterData = translationData[currentCharacterIndex];
+    const sentenceData = characterData.sentences[currentSentenceIndex];
+    
+    // Check if this sentence has segment data
+    if (!sentenceData.segments) {
+        console.log("No segments found - loading next question");
+        // If no segments, just proceed to next question
+        setTimeout(() => {
+            loadQuestion();
+        }, 1500);
         return;
     }
+    
+    const spanishSegments = sentenceData.segments.spanish;
+    const englishSegments = sentenceData.segments.english;
+    
+    // Set original sentence
+    const originalSentence = document.getElementById('original-sentence');
+    if (originalSentence) {
+        originalSentence.textContent = sentenceData.spanish;
+    }
+    
+    // Clear previous content
+    const englishComponents = document.getElementById('english-components');
+    const spanishOptionsMatching = document.getElementById('spanish-options-matching');
+    const matchResultMessage = document.getElementById('match-result-message');
+    
+    if (englishComponents) englishComponents.innerHTML = '';
+    if (spanishOptionsMatching) spanishOptionsMatching.innerHTML = '';
+    if (matchResultMessage) matchResultMessage.textContent = '';
+    
+    // Add English components and dropzones
+    if (englishComponents && spanishSegments && englishSegments) {
+        englishSegments.forEach((segment, index) => {
+            const matchContainer = document.createElement('div');
+            matchContainer.className = 'match-container';
+            
+            const englishComponent = document.createElement('div');
+            englishComponent.className = 'english-component';
+            englishComponent.textContent = segment;
+            
+            const spanishDropzone = document.createElement('div');
+            spanishDropzone.className = 'spanish-dropzone';
+            spanishDropzone.dataset.correct = spanishSegments[index];
+            
+            matchContainer.appendChild(englishComponent);
+            matchContainer.appendChild(spanishDropzone);
+            
+            englishComponents.appendChild(matchContainer);
+        });
+    }
+    
+    // Add Spanish draggable options
+    if (spanishOptionsMatching && spanishSegments) {
+        const shuffledSpanishSegments = [...spanishSegments];
+        shuffleArray(shuffledSpanishSegments);
+        
+        shuffledSpanishSegments.forEach(segment => {
+            const draggable = document.createElement('div');
+            draggable.className = 'draggable';
+            draggable.draggable = true;
+            draggable.textContent = segment;
+            draggable.addEventListener('click', () => speakSpanishSegment(segment));
+            
+            spanishOptionsMatching.appendChild(draggable);
+        });
+    }
+    
+    // Initialize drag and drop
+    initDragAndDrop();
+    
+    // Set up Check Matches button
+    const checkButton = document.getElementById('check-matches-btn');
+    if (checkButton) {
+        checkButton.removeEventListener('click', checkMatches);
+        checkButton.addEventListener('click', checkMatches);
+    }
+    
+    // Show the modal
+    const modalOverlay = document.getElementById('matching-modal-overlay');
+    if (modalOverlay) {
+        modalOverlay.style.display = 'flex';
+    }
+}
+
+// Initialize drag and drop functionality
+function initDragAndDrop() {
+    const draggables = document.querySelectorAll('.draggable');
+    const dropzones = document.querySelectorAll('.spanish-dropzone');
+    
+    let draggedElement = null;
+    
+    // Add event listeners to draggable elements
+    draggables.forEach(draggable => {
+        draggable.addEventListener('dragstart', () => {
+            draggable.classList.add('dragging');
+            draggedElement = draggable;
+        });
+        
+        draggable.addEventListener('dragend', () => {
+            draggable.classList.remove('dragging');
+        });
+    });
+    
+    // Add event listeners to dropzones
+    dropzones.forEach(dropzone => {
+        dropzone.addEventListener('dragover', e => {
+            e.preventDefault();
+            dropzone.classList.add('highlight');
+        });
+        
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('highlight');
+        });
+        
+        dropzone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropzone.classList.remove('highlight');
+            
+            // If dropzone already has content, return that content to options
+            if (dropzone.children.length > 0) {
+                const existingDraggable = dropzone.children[0];
+                const optionsContainer = document.querySelector('#spanish-options-matching');
+                if (optionsContainer) {
+                    optionsContainer.appendChild(existingDraggable);
+                }
+            }
+            
+            // Add the dragged element to the dropzone
+            if (draggedElement) {
+                dropzone.appendChild(draggedElement);
+                
+                // Pronounce the Spanish phrase when dropped
+                speakSpanishSegment(draggedElement.textContent);
+            }
+        });
+    });
+}
+
+// Check if the matching is correct
+function checkMatches() {
+    const dropzones = document.querySelectorAll('.spanish-dropzone');
+    let allCorrect = true;
+    let allFilled = true;
+    const resultMessage = document.getElementById('match-result-message');
+    const checkButton = document.getElementById('check-matches-btn');
+    
+    dropzones.forEach(dropzone => {
+        // Remove previous validation classes
+        dropzone.classList.remove('correct-match', 'incorrect-match');
+        
+        const correctText = dropzone.dataset.correct;
+        
+        // Check if there's a match in the dropzone
+        if (dropzone.children.length > 0) {
+            const droppedText = dropzone.children[0].textContent;
+            
+            if (droppedText === correctText) {
+                // Correct match
+                dropzone.classList.add('correct-match');
+            } else {
+                // Incorrect match
+                dropzone.classList.add('incorrect-match');
+                allCorrect = false;
+                
+                // Play error sound
+                playErrorSound();
+            }
+        } else {
+            // No match provided
+            allFilled = false;
+        }
+    });
+    
+    // Update result message and button
+    if (!allFilled) {
+        if (resultMessage) {
+            resultMessage.textContent = "Please match all phrases before checking.";
+            resultMessage.style.color = "blue";
+        }
+    } else if (allCorrect) {
+        if (resultMessage) {
+            resultMessage.textContent = "¡Excelente! All matches are correct!";
+            resultMessage.style.color = "green";
+        }
+        
+        if (checkButton) {
+            checkButton.textContent = "Continue";
+            checkButton.onclick = () => {
+                // Close modal and load next question
+                const modalOverlay = document.getElementById('matching-modal-overlay');
+                if (modalOverlay) {
+                    modalOverlay.style.display = 'none';
+                }
+                loadQuestion();
+            };
+        }
+        
+        // Show celebration
+        showCelebration();
+    } else {
+        if (resultMessage) {
+            resultMessage.textContent = "Try again! Some matches are incorrect.";
+            resultMessage.style.color = "red";
+        }
+    }
+}
+
+// Function to speak Spanish segment
+function speakSpanishSegment(text) {
+    if ('speechSynthesis' in window) {
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel();
+        
+        // Create a new utterance
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        // Set language to Spanish
+        utterance.lang = 'es-ES';
+        
+        // Get available voices
+        const voices = window.speechSynthesis.getVoices();
+        
+        // Try to find a female Spanish voice
+        const spanishFemaleVoice = voices.find(voice => 
+            voice.lang.includes('es') && voice.name.includes('Female'));
+        
+        // Use the Spanish female voice if found
+        if (spanishFemaleVoice) {
+            utterance.voice = spanishFemaleVoice;
+        }
+        
+        // Visual feedback
+        const element = document.querySelector('.draggable:hover, .draggable:active');
+        if (element) {
+            element.classList.add('speaking');
+            setTimeout(() => element.classList.remove('speaking'), 500);
+        }
+        
+        // Speak the text
+        window.speechSynthesis.speak(utterance);
+        
+        return utterance;
+    }
+    return null;
+  }
+
+// Function to speak Spanish sentence
+function speakSpanishText(text) {
+    if ('speechSynthesis' in window) {
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel();
+        
+        // Create a new utterance
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        // Set language to Spanish
+        utterance.lang = 'es-ES';
+        
+        // Get available voices
+        const voices = window.speechSynthesis.getVoices();
+        
+        // Try to find a female Spanish voice
+        const spanishFemaleVoice = voices.find(voice => 
+            voice.lang.includes('es') && voice.name.includes('Female'));
+        
+        // Use the Spanish female voice if found
+        if (spanishFemaleVoice) {
+            utterance.voice = spanishFemaleVoice;
+        }
+        
+        // Visual feedback
+        const element = document.querySelector('.draggable:hover, .draggable:active');
+        if (element) {
+            element.classList.add('speaking');
+            setTimeout(() => element.classList.remove('speaking'), 500);
+        }
+        
+        // Speak the text
+        window.speechSynthesis.speak(utterance);
+        
+        return utterance;
+    }
+    return null;
+  }
+
+// Show celebration animation
+function showCelebration() {
+    const celebration = document.getElementById('celebration');
+    if (!celebration) return;
     
     celebration.style.display = 'block';
     celebration.innerHTML = '';
@@ -7666,9 +7622,7 @@ function showCelebration() {
         const confetti = document.createElement('div');
         confetti.className = 'confetti';
         confetti.style.left = `${Math.random() * 100}%`;
-        confetti.style.top = `${Math.random() * 20 - 10}%`; // Start slightly above or at top
         confetti.style.animationDuration = `${2 + Math.random() * 2}s`;
-        confetti.style.animationDelay = `${Math.random() * 0.5}s`;
         confetti.style.backgroundColor = getRandomColor();
         celebration.appendChild(confetti);
     }
@@ -7679,23 +7633,47 @@ function showCelebration() {
     }, 4000);
 }
 
-function getRandomColor() {
-    const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#8800ff'];
-    return colors[Math.floor(Math.random() * colors.length)];
+// Play error sound
+function playErrorSound() {
+    const errorSound = new Audio('data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vmz+Zt//+mm3Wm3Q576v////+32///5/EOgAAADVghQAAAAA//uQZAUAB1WI0PZugAAAAAoQwAAAEk3nRd2qAAAAACiDgAAAAAAABCqEEQRLCgwpBGMlJkIz8jKhGvj4k6jzRnqasNKIeoh5gI7BJaC1A1AoNBjJgbyApVS4IDlZgDU5WUAxEKDNmmALHzZp0Fkz1FMTmGFl1FMEyodIavcCAUHDWrKAIA4aa2oCgILEBupZgHvAhEBcZ6joQBxS76AgccrFlczBvKLC0QI2cBoCFvfTDAo7eoOQInqDPBtvrDEZBNYN5xwNwxQRfw8ZQ5wQVLvO8OYU+mHvFLlDh05Mdg7BT6YrRPpCBznMB2r//xKJjyyOh+cImr2/4doscwD6neZjuZR4AgAABYAAAABy1xcdQtxYBYYZdifkUDgzzXaXn98Z0oi9ILU5mBjFANmRwlVJ3/6jYDAmxaiDG3/6xjQQCCKkRb/6kg/wW+kSJ5//rLobkLSiKmqP/0ikJuDaSaSf/6JiLYLEYnW/+kXg1WRVJL/9EmQ1YZIsv/6Qzwy5qk7/+tEU0nkls3/zIUMPKNX/6yZLf+kFgAfgGyLFAUwY//uQZAUABcd5UiNPVXAAAApAAAAAE0VZQKw9ISAAACgAAAAAVQIygIElVrFkBS+Jhi+EAuu+lKAkYUEIsmEAEoMeDmCETMvfSHTGkF5RWH7kz/ESHWPAq/kcCRhqBtMdokPdM7vil7RG98A2sc7zO6ZvTdM7pmOUAZTnJW+NXxqmd41dqJ6mLTXxrPpnV8avaIf5SvL7pndPvPpndJR9Kuu8fePvuiuhorgWjp7Mf/PRjxcFCPDkW31srioCExivv9lcwKEaHsf/7ow2Fl1T/9RkXgEhYElAoCLFtMArxwivDJJ+bR1HTKJdlEoTELCIqgEwVGSQ+hIm0NbK8WXcTEI0UPoa2NbG4y2K00JEWbZavJXkYaqo9CRHS55FcZTjKEk3NKoCYUnSQ0rWxrZbFKbKIhOKPZe1cJKzZSaQrIyULHDZmV5K4xySsDRKWOruanGtjLJXFEmwaIbDLX0hIPBUQPVFVkQkDoUNfSoDgQGKPekoxeGzA4DUvnn4bxzcZrtJyipKfPNy5w+9lnXwgqsiyHNeSVpemw4bWb9psYeq//uQZBoABQt4yMVxYAIAAAkQoAAAHvYpL5m6AAgAACXDAAAAD59jblTirQe9upFsmZbpMudy7Lz1X1DYsxOOSWpfPqNX2WqktK0DMvuGwlbNj44TleLPQ+Gsfb+GOWOKJoIrWb3cIMeeON6lz2umTqMXV8Mj30yWPpjoSa9ujK8SyeJP5y5mOW1D6hvLepeveEAEDo0mgCRClOEgANv3B9a6fikgUSu/DmAMATrGx7nng5p5iimPNZsfQLYB2sDLIkzRKZOHGAaUyDcpFBSLG9MCQALgAIgQs2YunOszLSAyQYPVC2YdGGeHD2dTdJk1pAHGAWDjnkcLKFymS3RQZTInzySoBwMG0QueC3gMsCEYxUqlrcxK6k1LQQcsmyYeQPdC2YfuGPASCBkcVMQQqpVJshui1tkXQJQV0OXGAZMXSOEEBRirXbVRQW7ugq7IM7rPWSZyDlM3IuNEkxzCOJ0ny2ThNkyRai1b6ev//3dzNGzNb//4uAvHT5sURcZCFcuKLhOFs8mLAAEAt4UWAAIABAAAAAB4qbHo0tIjVkUU//uQZAwABfSFz3ZqQAAAAAngwAAAE1HjMp2qAAAAACZDgAAAD5UkTE1UgZEUExqYynN1qZvqIOREEFmBcJQkwdxiFtw0qEOkGYfRDifBui9MQg4QAHAqWtAWHoCxu1Yf4VfWLPIM2mHDFsbQEVGwyqQoQcwnfHeIkNt9YnkiaS1oizycqJrx4KOQjahZxWbcZgztj2c49nKmkId44S71j0c8eV9yDK6uPRzx5X18eDvjvQ6yKo9ZSS6l//8elePK/Lf//IInrOF/FvDoADYAGBMGb7FtErm5MXMlmPAJQVgWta7Zx2go+8xJ0UiCb8LHHdftWyLJE0QIAIsI+UbXu67dZMjmgDGCGl1H+vpF4NSDckSIkk7Vd+sxEhBQMRU8j/12UIRhzSaUdQ+rQU5kGeFxm+hb1oh6pWWmv3uvmReDl0UnvtapVaIzo1jZbf/pD6ElLqSX+rUmOQNpJFa/r+sa4e/pBlAABoAAAAA3CUgShLdGIxsY7AUABPRrgCABdDuQ5GC7DqPQCgbbJUAoRSUj+NIEig0YfyWUho1VBBBA//uQZB4ABZx5zfMakeAAAAmwAAAAF5F3P0w9GtAAACfAAAAAwLhMDmAYWMgVEG1U0FIGCBgXBXAtfMH10000EEEEEECUBYln03TTTdNBDZopopYvrTTdNa325mImNg3TTPV9q3pmY0xoO6bv3r00y+IDGid/9aaaZTGMuj9mpu9Mpio1dXrr5HERTZSmqU36A3CumzN/9Robv/Xx4v9ijkSRSNLQhAWumap82WRSBUqXStV/YcS+XVLnSS+WLDroqArFkMEsAS+eWmrUzrO0oEmE40RlMZ5+ODIkAyKAGUwZ3mVKmcamcJnMW26MRPgUw6j+LkhyHGVGYjSUUKNpuJUQoOIAyDvEyG8S5yfK6dhZc0Tx1KI/gviKL6qvvFs1+bWtaz58uUNnryq6kt5RzOCkPWlVqVX2a/EEBUdU1KrXLf40GoiiFXK///qpoiDXrOgqDR38JB0bw7SoL+ZB9o1RCkQjQ2CBYZKd/+VJxZRRZlqSkKiws0WFxUyCwsKiMy7hUVFhIaCrNQsKkTIsLivwKKigsj8XYlwt/WKi2N4d//uQRCSAAjURNIHpMZBGYiaQPSYyAAABLAAAAAAAACWAAAAApUF/Mg+0aohSIRobBAsMlO//Kk4soosy1JSFRYWaLC4qZBYWFRGZdwqKiwkNBVmoWFSJkWFxX4FFRQWR+LsS4W/rFRb/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////VEFHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU291bmRib3kuZGUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjAwNGh0dHA6Ly93d3cuc291bmRib3kuZGUAAAAAAAAAACU=');
+    errorSound.play();
 }
 
 // Helper functions
 function shuffleArray(array) {
-    const shuffled = [...array]; // Create a copy to avoid modifying original
-    
-    for (let i = shuffled.length - 1; i > 0; i--) {
+    for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; // Swap elements
+        [array[i], array[j]] = [array[j], array[i]];
     }
-    
-    return shuffled;
+    return array;
 }
 
-</script>
+function getRandomColor() {
+    const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#88ff00', '#0088ff', '#ff0088'];
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
+// Initialize the game on page load
+window.addEventListener('DOMContentLoaded', function() {
+    // Load the voices first (this can be asynchronous in some browsers)
+    if (window.speechSynthesis) {
+        const voicesLoaded = new Promise(resolve => {
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length) {
+                resolve();
+            } else {
+                speechSynthesis.onvoiceschanged = resolve;
+            }
+        });
+
+        voicesLoaded.then(() => {
+            console.log("Voices loaded:", window.speechSynthesis.getVoices().length);
+            loadQuestion();
+        });
+    } else {
+        loadQuestion();
+    }
+});  
+    </script>
 </body>
 </html>
