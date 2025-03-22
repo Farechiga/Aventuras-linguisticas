@@ -5838,7 +5838,7 @@
     segments: {
       spanish: ["La compasión", "de Po le ayudó", "a resolver conflictos", "pacíficamente cuando era posible."],
       english: ["Compassion", "helped Po", "solve conflicts", "peacefully when possible."]
-    }
+}
       }
     ]
   },
@@ -6893,7 +6893,7 @@ sentences: [
     english: "Flo invented a radio transmitter using just spare airplane parts.",
     spanish: "Flo inventó un transmisor de radio usando solo piezas sobrantes de avión.",
     segments: {
-      spanish: ["Flo", "inventó un transmisor", "de radio", "usando solo piezas sobrantes de avión."],
+      spanish: ["Flo", "inventó", "un transmisor de radio", "usando solo piezas sobrantes de avión."],
       english: ["Flo", "invented", "a radio transmitter", "using just spare airplane parts."]
     }
   },
@@ -6909,7 +6909,7 @@ sentences: [
     english: "Franny created emergency water filters from tropical plant fibers.",
     spanish: "Franny creó filtros de agua de emergencia con fibras de plantas tropicales.",
     segments: {
-      spanish: ["Franny", "creó filtros", "de agua de emergencia", "con fibras de plantas tropicales."],
+      spanish: ["Franny", "creó", "filtros de agua de emergencia", "con fibras de plantas tropicales."],
       english: ["Franny", "created", "emergency water filters", "from tropical plant fibers."]
     }
   },
@@ -6925,7 +6925,7 @@ sentences: [
     english: "Flo decoded the mysterious map using ancient astronomy knowledge.",
     spanish: "Flo decodificó el mapa misterioso usando conocimientos antiguos de astronomía.",
     segments: {
-      spanish: ["Flo", "decodificó el mapa", "misterioso", "usando conocimientos antiguos de astronomía."],
+      spanish: ["Flo", "decodificó", "el mapa misterioso", "usando conocimientos antiguos de astronomía."],
       english: ["Flo", "decoded", "the mysterious map", "using ancient astronomy knowledge."]
     }
   },
@@ -6934,7 +6934,7 @@ sentences: [
     spanish: "Faye diseñó un sistema de poleas para rescatar a exploradores.",
     segments: {
       spanish: ["Faye", "diseñó un sistema", "de poleas", "para rescatar a exploradores."],
-      english: ["Faye", "engineered", "a pulley system", "to rescue explorers."]
+      english: ["Faye", "engineered a system", "for pulleys", "to rescue explorers."]
     }
   },
   {
@@ -6958,7 +6958,7 @@ sentences: [
     spanish: "Flo creó instrumentos de predicción meteorológica con bambú y tela.",
     segments: {
       spanish: ["Flo", "creó instrumentos", "de predicción meteorológica", "con bambú y tela."],
-      english: ["Flo", "created", "weather prediction instruments", "from bamboo and cloth."]
+      english: ["Flo", "created instruments", "for weather prediction", "from bamboo and cloth."]
     }
   },
   {
@@ -7030,7 +7030,7 @@ sentences: [
     spanish: "Faye enseñó técnicas de navegación astronómica a marineros locales.",
     segments: {
       spanish: ["Faye", "enseñó técnicas", "de navegación astronómica", "a marineros locales."],
-      english: ["Faye", "taught", "astronomical navigation techniques", "to local sailors."]
+      english: ["Faye", "taught techniques", "for astronomical navigation", "to local sailors."]
     }
   },
   {
@@ -7077,16 +7077,16 @@ sentences: [
     english: "Franny created natural medicines using indigenous plant knowledge.",
     spanish: "Franny creó medicinas naturales usando conocimiento de plantas indígenas.",
     segments: {
-      spanish: ["Franny", "creó medicinas", "naturales", "usando conocimiento de plantas indígenas."],
-      english: ["Franny", "created", "natural medicines", "using indigenous plant knowledge."]
+      spanish: ["Franny creó", "medicinas naturales", "usando conocimiento", "de plantas indígenas."],
+      english: ["Franny created", "natural medicines", "using knowledge", "of indigenous plant."]
     }
   },
   {
     english: "With quick thinking, the Flying Flamingo Sisters neutralized the volcanic gas threat.",
     spanish: "Con pensamiento rápido, Las Hermanas Flamencos Voladores neutralizaron la amenaza de gases volcánicos.",
     segments: {
-      spanish: ["Con pensamiento", "rápido,", "Las Hermanas Flamencos Voladores neutralizaron", "la amenaza de gases volcánicos."],
-      english: ["With", "quick thinking,", "the Flying Flamingo Sisters neutralized", "the volcanic gas threat."]
+      spanish: ["Con pensamiento rápido", "Las Hermanas Flamencos Voladores,", "neutralizaron", "la amenaza de gases volcánicos."],
+      english: ["With quick thinking", "The Flying Flamingo Sisters,", "neutralized", "the volcanic gas threat."]
     }
   },
   {
@@ -7100,7 +7100,7 @@ sentences: [
     ]
   }
 ];
-    
+
 // Game state variables
 let recentlyUsedQuestions = [];
 let currentCharacterIndex = -1;
@@ -7123,8 +7123,18 @@ const matchResultMessage = document.getElementById('match-result-message');
 const originalSentence = document.getElementById('original-sentence');
 const checkMatchesBtn = document.getElementById('check-matches-btn');
 
+// Define the shuffle function
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+  }
+  return array;
+}
+
 // Load a new question with robust randomization
 function loadQuestion() {
+    console.log("Loading new question");
     // Clear all previous content
     spanishOptions.innerHTML = '';
     
@@ -7132,6 +7142,11 @@ function loadQuestion() {
     const existingHint = document.querySelector('.translation-hint');
     if (existingHint) {
         existingHint.remove();
+    }
+    
+    // Hide matching modal if visible
+    if (matchingModalOverlay) {
+        matchingModalOverlay.style.display = 'none';
     }
     
     // Validate translation data structure
@@ -7176,9 +7191,6 @@ function loadQuestion() {
         // Check if we've used this question recently
         questionKey = `${selectedCharIndex}-${selectedSentenceIndex}`;
         isRecentlyUsed = recentlyUsedQuestions.includes(questionKey);
-        
-        // Add debugging
-        console.log(`Attempt ${attempt}: Char ${selectedCharIndex}, Sentence ${selectedSentenceIndex}, Recently used? ${isRecentlyUsed}`);
         
         // If we've tried several times and all are recently used, just use the last one
         if (attempt >= 10 && isRecentlyUsed) {
@@ -7361,8 +7373,10 @@ function checkAnswer(selectedOption, selectedElement) {
 
 // Function to show the matching game
 function showMatchingGame() {
+    console.log("Showing matching game");
     if (currentCharacterIndex === -1 || currentSentenceIndex === -1) {
         console.error("Invalid character or sentence index");
+        loadQuestion(); // Fallback, try to load a new question
         return;
     }
 
@@ -7371,7 +7385,7 @@ function showMatchingGame() {
 
     // Check if we have segment data for this sentence
     if (!sentenceData || !sentenceData.segments) {
-        console.warn("No segment data found for this sentence");
+        console.warn("No segment data found for this sentence - loading next question");
         setTimeout(() => {
             loadQuestion();
         }, 1000);
@@ -7384,12 +7398,26 @@ function showMatchingGame() {
     // Set original sentence
     if (originalSentence) {
         originalSentence.textContent = sentenceData.spanish;
+    } else {
+        console.warn("Original sentence element not found");
     }
 
     // Clear previous content
-    englishComponents.innerHTML = '';
-    spanishOptionsMatching.innerHTML = '';
-    matchResultMessage.textContent = '';
+    if (englishComponents) {
+        englishComponents.innerHTML = '';
+    } else {
+        console.warn("English components container not found");
+    }
+    
+    if (spanishOptionsMatching) {
+        spanishOptionsMatching.innerHTML = '';
+    } else {
+        console.warn("Spanish options matching container not found");
+    }
+    
+    if (matchResultMessage) {
+        matchResultMessage.textContent = '';
+    }
 
     // Add English components and dropzones
     englishSegments.forEach((segment, index) => {
@@ -7407,8 +7435,17 @@ function showMatchingGame() {
         matchContainer.appendChild(englishComponent);
         matchContainer.appendChild(spanishDropzone);
 
-        englishComponents.appendChild(matchContainer);
+        if (englishComponents) {
+            englishComponents.appendChild(matchContainer);
+        }
     });
+
+    // Create a container for Spanish options
+    const spanishOptionsContainer = document.createElement('div');
+    spanishOptionsContainer.id = 'spanishOptionsContainer';
+    if (spanishOptionsMatching) {
+        spanishOptionsMatching.appendChild(spanishOptionsContainer);
+    }
 
     // Add Spanish draggable options
     const shuffledSpanishSegments = [...spanishSegments];
@@ -7420,72 +7457,289 @@ function showMatchingGame() {
         draggable.draggable = true;
         draggable.textContent = segment;
         draggable.addEventListener('click', () => speakSpanishText(segment));
-
-        spanishOptionsMatching.appendChild(draggable);
+        spanishOptionsContainer.appendChild(draggable);
     });
 
     // Initialize drag and drop
-    initDragAndDrop();
+    initDragAndDrop(spanishOptionsContainer);
 
     // Set up Check Matches button
     if (checkMatchesBtn) {
-        checkMatchesBtn.removeEventListener('click', checkMatches);
-        checkMatchesBtn.addEventListener('click', checkMatches);
+        checkMatchesBtn.onclick = checkMatches;
         checkMatchesBtn.textContent = "Check Matches";
+    } else {
+        console.warn("Check matches button not found");
     }
 
     // Show the modal
     if (matchingModalOverlay) {
+        console.log("Displaying matching modal");
         matchingModalOverlay.style.display = 'flex';
+    } else {
+        console.warn("Matching modal overlay not found");
+    }
+}
+
+// Function to make elements draggable on both desktop and mobile
+function makeDraggable(element, container) {
+    // Original element position for snapping back
+    let originalRect = null;
+    // Tracking variables for movement
+    let initialMouseX, initialMouseY;
+    let initialElementX, initialElementY;
+    let isDragging = false;
+    let clone = null;
+    
+    // Desktop events
+    element.addEventListener('mousedown', startDrag);
+    
+    // Mobile events
+    element.addEventListener('touchstart', startDragTouch, { passive: false });
+    
+    function startDrag(e) {
+        e.preventDefault();
+        
+        // Store original position
+        originalRect = element.getBoundingClientRect();
+        initialMouseX = e.clientX;
+        initialMouseY = e.clientY;
+        initialElementX = originalRect.left;
+        initialElementY = originalRect.top;
+        
+        // Create a clone for dragging
+        clone = element.cloneNode(true);
+        clone.style.position = 'fixed';
+        clone.style.width = originalRect.width + 'px';
+        clone.style.height = originalRect.height + 'px';
+        clone.style.left = initialElementX + 'px';
+        clone.style.top = initialElementY + 'px';
+        clone.style.zIndex = '1000';
+        clone.style.opacity = '0.8';
+        clone.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+        clone.style.pointerEvents = 'none'; // Prevent the clone from intercepting events
+        clone.classList.add('dragging');
+        
+        document.body.appendChild(clone);
+        
+        // Make the original semi-transparent to indicate it's being moved
+        element.style.opacity = '0.4';
+        
+        // Add move and end events
+        document.addEventListener('mousemove', dragMove);
+        document.addEventListener('mouseup', endDrag);
+        
+        isDragging = true;
+    }
+    
+    function dragMove(e) {
+        if (!isDragging || !clone) return;
+        
+        const dx = e.clientX - initialMouseX;
+        const dy = e.clientY - initialMouseY;
+        
+        // Move the clone
+        clone.style.left = (initialElementX + dx) + 'px';
+        clone.style.top = (initialElementY + dy) + 'px';
+    }
+    
+    function endDrag(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        
+        // Remove the clone's dragging class
+        if (clone) {
+            clone.classList.remove('dragging');
+        }
+        
+        // Calculate final position
+        const finalX = initialElementX + (e.clientX - initialMouseX);
+        const finalY = initialElementY + (e.clientY - initialMouseY);
+        
+        // Find if there's a dropzone at this position
+        const dropped = handleDropAtPosition(finalX, finalY, element);
+        
+        // Clean up
+        document.removeEventListener('mousemove', dragMove);
+        document.removeEventListener('mouseup', endDrag);
+        
+        if (clone) {
+            document.body.removeChild(clone);
+            clone = null;
+        }
+        
+        // Restore the original element
+        element.style.opacity = '1';
+        
+        if (!dropped) {
+            // Return to container if not dropped
+            returnToContainer(element, container);
+        }
+    }
+    
+    function startDragTouch(e) {
+        if (e.touches.length !== 1) return;
+        e.preventDefault();
+        
+        const touch = e.touches[0];
+        
+        // Store original position
+        originalRect = element.getBoundingClientRect();
+        initialMouseX = touch.clientX;
+        initialMouseY = touch.clientY;
+        initialElementX = originalRect.left;
+        initialElementY = originalRect.top;
+        
+        // Create a clone for dragging
+        clone = element.cloneNode(true);
+        clone.style.position = 'fixed';
+        clone.style.width = originalRect.width + 'px';
+        clone.style.height = originalRect.height + 'px';
+        clone.style.left = initialElementX + 'px';
+        clone.style.top = initialElementY + 'px';
+        clone.style.zIndex = '1000';
+        clone.style.opacity = '0.8';
+        clone.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+        clone.style.pointerEvents = 'none';
+        clone.classList.add('dragging');
+        
+        document.body.appendChild(clone);
+        
+        // Make the original semi-transparent
+        element.style.opacity = '0.4';
+        
+        // Add move and end events
+        document.addEventListener('touchmove', dragMoveTouch, { passive: false });
+        document.addEventListener('touchend', endDragTouch);
+        
+        isDragging = true;
+    }
+    
+    function dragMoveTouch(e) {
+        if (!isDragging || !clone || e.touches.length !== 1) return;
+        e.preventDefault();
+        
+        const touch = e.touches[0];
+        const dx = touch.clientX - initialMouseX;
+        const dy = touch.clientY - initialMouseY;
+        
+        // Move the clone
+        clone.style.left = (initialElementX + dx) + 'px';
+        clone.style.top = (initialElementY + dy) + 'px';
+    }
+    
+    function endDragTouch(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        
+        // Get final touch position
+        let finalX = initialElementX;
+        let finalY = initialElementY;
+        
+        if (e.changedTouches && e.changedTouches.length > 0) {
+            const touch = e.changedTouches[0];
+            finalX = initialElementX + (touch.clientX - initialMouseX);
+            finalY = initialElementY + (touch.clientY - initialMouseY);
+        }
+        
+        // Find if there's a dropzone at this position
+        const dropped = handleDropAtPosition(finalX, finalY, element);
+        
+        // Clean up
+        document.removeEventListener('touchmove', dragMoveTouch);
+        document.removeEventListener('touchend', endDragTouch);
+        
+        if (clone) {
+            document.body.removeChild(clone);
+            clone = null;
+        }
+        
+        // Restore the original element
+        element.style.opacity = '1';
+        
+        if (!dropped) {
+            // Return to container if not dropped
+            returnToContainer(element, container);
+        }
+    }
+}
+
+// Create a placeholder where the dragged element was
+function createPlaceholder(element) {
+    // We could create a visible placeholder here if needed
+}
+
+// Handle the drop based on final position
+function handleDropAtPosition(x, y, element) {
+    const dropzones = document.querySelectorAll('.spanish-dropzone');
+    const elementCenter = {
+        x: x + (element.offsetWidth / 2),
+        y: y + (element.offsetHeight / 2)
+    };
+    
+    let dropped = false;
+    
+    // Find a dropzone at the position
+    for (const dropzone of dropzones) {
+        const dropzoneRect = dropzone.getBoundingClientRect();
+        
+        // Check if element center is within dropzone
+        if (
+            elementCenter.x >= dropzoneRect.left &&
+            elementCenter.x <= dropzoneRect.right &&
+            elementCenter.y >= dropzoneRect.top &&
+            elementCenter.y <= dropzoneRect.bottom
+        ) {
+            // Highlight the dropzone briefly
+            dropzone.classList.add('highlight');
+            setTimeout(() => {
+                dropzone.classList.remove('highlight');
+            }, 300);
+            
+            // If dropzone already contains an element, put it back in options
+            if (dropzone.children.length > 0) {
+                const existingElement = dropzone.children[0];
+                const container = document.getElementById('spanishOptionsContainer');
+                if (container) {
+                    container.appendChild(existingElement);
+                }
+            }
+            
+            // Add dropped element to dropzone
+            dropzone.appendChild(element);
+            
+            // Speak the Spanish text
+            speakSpanishText(element.textContent);
+            
+            dropped = true;
+            break;
+        }
+    }
+    
+    return dropped;
+}
+
+// Return element to its container
+function returnToContainer(element, container) {
+    if (container) {
+        container.appendChild(element);
+        element.style.position = '';
+        element.style.top = '';
+        element.style.left = '';
+        element.style.zIndex = '';
     }
 }
 
 // Initialize drag and drop functionality
-function initDragAndDrop() {
+function initDragAndDrop(container) {
     const draggables = document.querySelectorAll('.draggable');
-    const dropzones = document.querySelectorAll('.spanish-dropzone');
     
-    let draggedElement = null;
-    
-    // Add event listeners to draggable elements
     draggables.forEach(draggable => {
-        draggable.addEventListener('dragstart', () => {
-            draggable.classList.add('dragging');
-            draggedElement = draggable;
-        });
+        makeDraggable(draggable, container);
         
-        draggable.addEventListener('dragend', () => {
-            draggable.classList.remove('dragging');
-        });
-    });
-    
-    // Add event listeners to dropzones
-    dropzones.forEach(dropzone => {
-        dropzone.addEventListener('dragover', e => {
-            e.preventDefault();
-            dropzone.classList.add('highlight');
-        });
-        
-        dropzone.addEventListener('dragleave', () => {
-            dropzone.classList.remove('highlight');
-        });
-        
-        dropzone.addEventListener('drop', e => {
-            e.preventDefault();
-            dropzone.classList.remove('highlight');
-            
-            // If dropzone already has content, return that content to options
-            if (dropzone.children.length > 0) {
-                const existingDraggable = dropzone.children[0];
-                spanishOptionsMatching.appendChild(existingDraggable);
-            }
-            
-            // Add the dragged element to the dropzone
-            if (draggedElement) {
-                dropzone.appendChild(draggedElement);
-                
-                // Pronounce the Spanish phrase when dropped
-                speakSpanishText(draggedElement.textContent);
+        // Pronounce when clicked
+        draggable.addEventListener('click', () => {
+            if (!draggable.classList.contains('dragging')) {
+                speakSpanishText(draggable.textContent);
             }
         });
     });
@@ -7493,55 +7747,79 @@ function initDragAndDrop() {
 
 // Check if the matching is correct
 function checkMatches() {
+    console.log("Checking matches...");
     const dropzones = document.querySelectorAll('.spanish-dropzone');
     let allCorrect = true;
     let allFilled = true;
     
     dropzones.forEach(dropzone => {
-        // Remove previous validation classes
-        dropzone.classList.remove('correct-match', 'incorrect-match');
-        
-        const correctText = dropzone.dataset.correct;
-        
-        // Check if there's a match in the dropzone
-        if (dropzone.children.length > 0) {
-            const droppedText = dropzone.children[0].textContent;
-            
-            if (droppedText === correctText) {
-                // Correct match
-                dropzone.classList.add('correct-match');
-            } else {
-                // Incorrect match
-                dropzone.classList.add('incorrect-match');
-                allCorrect = false;
-            }
-        } else {
-            // No match provided
+        // Check if dropzone has a child
+        if (dropzone.children.length === 0) {
             allFilled = false;
+            return;
+        }
+        
+        const spanishSegment = dropzone.children[0].textContent;
+        const correctSegment = dropzone.dataset.correct;
+        
+        console.log(`Checking: '${spanishSegment}' against correct '${correctSegment}'`);
+        
+        // Check if the segment matches the correct answer
+        if (spanishSegment !== correctSegment) {
+            allCorrect = false;
+            // Add visual feedback
+            dropzone.children[0].classList.add('incorrect-match');
+            setTimeout(() => {
+                dropzone.children[0].classList.remove('incorrect-match');
+            }, 1000);
+        } else {
+            // Correct match feedback
+            dropzone.children[0].classList.add('correct-match');
         }
     });
     
-    // Update result message
     if (!allFilled) {
-        matchResultMessage.textContent = "Please match all phrases before checking.";
-        matchResultMessage.style.color = "blue";
-    } else if (allCorrect) {
-        matchResultMessage.textContent = "¡Excelente! All matches are correct!";
-        matchResultMessage.style.color = "green";
+        // Not all dropzones have segments
+        if (matchResultMessage) {
+            matchResultMessage.textContent = "Please place all Spanish segments in the matching boxes!";
+            matchResultMessage.style.color = "orange";
+            setTimeout(() => {
+                matchResultMessage.textContent = "";
+            }, 2000);
+        }
+        return;
+    }
+    
+    if (allCorrect) {
+        // Show success message
+        if (matchResultMessage) {
+            matchResultMessage.textContent = "Perfect! Great job!";
+            matchResultMessage.style.color = "green";
+        }
         
-        // Change button text and function to continue
-        checkMatchesBtn.textContent = "Continue";
-        checkMatchesBtn.onclick = () => {
-            // Close modal and load next question
-            matchingModalOverlay.style.display = 'none';
-            loadQuestion();
-        };
+        // Update score
+        correctCount++;
+        correctCountDisplay.textContent = correctCount;
         
         // Show celebration
         showCelebration();
+        
+        // Load next question after delay
+        setTimeout(() => {
+            if (matchingModalOverlay) {
+                matchingModalOverlay.style.display = 'none';
+            }
+            loadQuestion();
+        }, 2000);
     } else {
-        matchResultMessage.textContent = "Try again! Some matches are incorrect.";
-        matchResultMessage.style.color = "red";
+        // Show error message
+        if (matchResultMessage) {
+            matchResultMessage.textContent = "Not quite right. Try again!";
+            matchResultMessage.style.color = "red";
+            setTimeout(() => {
+                matchResultMessage.textContent = "";
+            }, 2000);
+        }
     }
 }
 
@@ -7559,7 +7837,7 @@ function speakSpanishText(text) {
             utterance.lang = 'es-ES';
             
             // Get available voices
-            const voices = window.speechSynthesis.getVoices();
+            let voices = window.speechSynthesis.getVoices();
             
             // Try to find a Spanish voice
             const spanishVoice = voices.find(voice => voice.lang.includes('es'));
@@ -7577,7 +7855,6 @@ function speakSpanishText(text) {
 
 // Show celebration animation
 function showCelebration() {
-    const celebration = document.getElementById('celebration');
     if (!celebration) return;
     
     celebration.style.display = 'block';
@@ -7599,15 +7876,7 @@ function showCelebration() {
     }, 4000);
 }
 
-// Helper functions
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
-
+// Get random color for confetti
 function getRandomColor() {
     const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#88ff00', '#0088ff', '#ff0088'];
     return colors[Math.floor(Math.random() * colors.length)];
@@ -7628,6 +7897,102 @@ window.addEventListener('DOMContentLoaded', function() {
             };
         }
     }
+    
+    // Add CSS for drag and drop
+    const style = document.createElement('style');
+    style.textContent = `
+        .draggable {
+            user-select: none;
+            -webkit-user-select: none;
+            cursor: grab;
+            background-color: #3e3364;
+            color: white;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            touch-action: none; /* Disable browser handling of touches */
+        }
+        .draggable:hover {
+            background-color: #4e4174;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .draggable.dragging {
+            cursor: grabbing;
+            transform: scale(1.05);
+            z-index: 1000;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        .spanish-dropzone {
+            border: 2px dashed #85296a;
+            border-radius: 10px;
+            padding: 12px;
+            min-height: 50px;
+            transition: all 0.3s;
+            background-color: #d9c7d6;
+            margin-bottom: 10px;
+        }
+        .spanish-dropzone.highlight {
+            background-color: #c4a0be;
+            border-style: solid;
+            border-color: #85296a;
+            box-shadow: 0 0 10px rgba(133, 41, 106, 0.5);
+            transform: scale(1.03);
+        }
+        #spanishOptionsContainer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 10px;
+        }
+        .correct-match {
+            background-color: #aaffaa !important;
+            border-color: green !important;
+            animation: correctPulse 0.5s;
+        }
+        .incorrect-match {
+            background-color: #ffaaaa !important;
+            border-color: red !important;
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Mobile optimization */
+        @media (max-width: 768px) {
+            .draggable {
+                padding: 12px;
+                margin: 3px;
+                font-size: 14px;
+            }
+            .spanish-dropzone {
+                min-height: 45px;
+                padding: 10px;
+            }
+            .english-component {
+                font-size: 14px;
+                padding: 10px;
+            }
+            .match-container {
+                margin-bottom: 10px;
+            }
+        }
+    `;
+    document.head.appendChild(style);
     
     // Start the game
     loadQuestion();
