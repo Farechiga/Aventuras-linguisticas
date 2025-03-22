@@ -367,20 +367,37 @@
         }
         
         .check-matches-btn {
-            background-color: #85296a;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 12px 25px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 20px;
-            width: 100%;
-            max-width: 200px;
-            align-self: center;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-        }
+    position: sticky;
+    bottom: 10px;
+    z-index: 100;
+    margin: 20px auto;
+    background-color: #85296a;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 12px 25px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: block;
+    width: 200px;
+}
+
+/* For mobile devices, use fixed positioning */
+@media (max-width: 768px) {
+    .check-matches-btn {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80%;
+        max-width: 200px;
+    }
+    
+    /* Add padding at bottom of modal to prevent button overlap */
+    .matching-modal {
+        padding-bottom: 80px;
+    }
+}
         
         .check-matches-btn:hover {
             background-color: #6a2055;
