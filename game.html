@@ -7417,7 +7417,24 @@ function checkAnswer(selectedOption, selectedElement) {
         // Show matching game after a delay
         setTimeout(() => {
             showMatchingGame();
-        }, 1500);
+        
+                    // For mobile - ensure the modal is displayed properly
+                    if (window.innerWidth <= 768 && matchingModalOverlay) {
+                matchingModalOverlay.style.display = 'flex';
+                
+                // Hide title and original sentence
+                if (document.querySelector('.modal-title')) {
+                    document.querySelector('.modal-title').style.display = 'none';
+                }
+                
+                if (document.querySelector('#original-sentence')) {
+                    document.querySelector('#original-sentence').style.display = 'none';
+                }
+                
+                // Reposition Spanish options for better visibility
+                setTimeout(repositionSpanishOptions, 100);
+            }
+          }, 1500);
     } else {
         // Incorrect answer
         selectedElement.classList.add('incorrect');
@@ -7460,6 +7477,8 @@ function checkAnswer(selectedOption, selectedElement) {
 // Function to show the matching game
 function showMatchingGame() {
     console.log("Showing matching game");
+    console.log("Current width:", window.innerWidth);
+    console.log("Is mobile:", window.innerWidth <= 768);
     if (currentCharacterIndex === -1 || currentSentenceIndex === -1) {
         console.error("Invalid character or sentence index");
         loadQuestion(); // Fallback, try to load a new question
@@ -7609,6 +7628,19 @@ if (matchingModalOverlay) {
     if (matchingModalOverlay) {
         console.log("Displaying matching modal");
         matchingModalOverlay.style.display = 'flex';
+    
+        // Force redraw for mobile browsers
+        setTimeout(() => {
+            if (matchingModalOverlay.style.display !== 'flex') {
+                console.log("Modal display was changed, forcing back to flex");
+                matchingModalOverlay.style.display = 'flex';
+            }
+            
+            // Force repositioning of Spanish options
+            if (window.innerWidth <= 768) {
+                repositionSpanishOptions();
+            }
+        }, 50);        
     } else {
         console.warn("Matching modal overlay not found");
     }
