@@ -7188,6 +7188,7 @@
 ];
 
 // Game state variables
+let isMobileDevice = window.innerWidth <= 768;
 let recentlyUsedQuestions = [];
 let currentCharacterIndex = -1;
 let currentSentenceIndex = -1;
@@ -7402,6 +7403,8 @@ function getRandomIncorrectOptions(count = 2) {
 
 // Check if the answer is correct
 function checkAnswer(selectedOption, selectedElement) {
+    console.log("checkAnswer called, isMobileDevice:", isMobileDevice);
+    
     // Speak the selected Spanish text
     speakSpanishText(selectedOption);
 
@@ -7414,29 +7417,58 @@ function checkAnswer(selectedOption, selectedElement) {
         // Show celebration animation
         showCelebration();
 
-        // Show matching game after a delay
-        setTimeout(() => {
-            showMatchingGame();
+        // Store that we need to show the matching game
+        const needToShowMatchingGame = true;
         
-                    // For mobile - ensure the modal is displayed properly
-                    if (window.innerWidth <= 768 && matchingModalOverlay) {
-                matchingModalOverlay.style.display = 'flex';
+        // Show matching game after a delay - different handling for mobile
+        setTimeout(() => {
+            console.log("Correct answer timeout triggered, showing matching game");
+            
+            // Direct call for mobile
+            if (isMobileDevice) {
+                console.log("Mobile detected, direct display of modal");
                 
-                // Hide title and original sentence
-                if (document.querySelector('.modal-title')) {
-                    document.querySelector('.modal-title').style.display = 'none';
+                // Make sure modal exists
+                if (matchingModalOverlay) {
+                    // Ensure data is loaded first
+                    if (currentCharacterIndex >= 0 && currentSentenceIndex >= 0) {
+                        const characterData = translationData[currentCharacterIndex];
+                        const sentenceData = characterData.sentences[currentSentenceIndex];
+                        
+                        // Force modal display
+                        matchingModalOverlay.style.display = 'flex';
+                        
+                        // Set original sentence
+                        if (originalSentence) {
+                            originalSentence.textContent = sentenceData.spanish;
+                            // But hide it on mobile
+                            originalSentence.style.display = 'none';
+                        }
+                        
+                        // Hide title on mobile
+                        const modalTitle = document.querySelector('.modal-title');
+                        if (modalTitle) {
+                            modalTitle.style.display = 'none';
+                        }
+                        
+                        // Prepare content for matching game
+                        prepareMatchingContent(sentenceData);
+                        
+                        // Force repositioning of Spanish options
+                        setTimeout(repositionSpanishOptions, 100);
+                    } else {
+                        console.error("Invalid character or sentence data");
+                    }
+                } else {
+                    console.error("Modal overlay not found");
                 }
-                
-                if (document.querySelector('#original-sentence')) {
-                    document.querySelector('#original-sentence').style.display = 'none';
-                }
-                
-                // Reposition Spanish options for better visibility
-                setTimeout(repositionSpanishOptions, 100);
+            } else {
+                // Desktop version - use regular function
+                showMatchingGame();
             }
-          }, 1500);
+        }, 1500);
     } else {
-        // Incorrect answer
+        // Incorrect answer - keep original logic
         selectedElement.classList.add('incorrect');
         
         // Find the English translation for this incorrect Spanish option
@@ -7471,6 +7503,111 @@ function checkAnswer(selectedOption, selectedElement) {
         setTimeout(function() {
             selectedElement.classList.remove('incorrect');
         }, 500);
+    }
+}
+
+// Create a new function to prepare matching content
+function prepareMatchingContent(sentenceData) {
+    console.log("Preparing matching content");
+    
+    if (!sentenceData || !sentenceData.segments) {
+        console.warn("No segment data found");
+        return;
+    }
+    
+    const spanishSegments = sentenceData.segments.spanish;
+    const englishSegments = sentenceData.segments.english;
+    
+    // Clear previous content
+    if (englishComponents) {
+        englishComponents.innerHTML = '';
+    }
+    
+    if (spanishOptionsMatching) {
+        spanishOptionsMatching.innerHTML = '';
+    }
+    
+    if (matchResultMessage) {
+        matchResultMessage.textContent = '';
+    }
+
+    // Add English components and dropzones
+    englishSegments.forEach((segment, index) => {
+        const matchContainer = document.createElement('div');
+        matchContainer.className = 'match-container';
+
+        const englishComponent = document.createElement('div');
+        englishComponent.className = 'english-component';
+        englishComponent.textContent = segment;
+
+        const spanishDropzone = document.createElement('div');
+        spanishDropzone.className = 'spanish-dropzone';
+        spanishDropzone.dataset.correct = spanishSegments[index];
+
+        matchContainer.appendChild(englishComponent);
+        matchContainer.appendChild(spanishDropzone);
+
+        if (englishComponents) {
+            englishComponents.appendChild(matchContainer);
+        }
+    });
+
+    // Create a container for Spanish options
+    const spanishOptionsContainer = document.createElement('div');
+    spanishOptionsContainer.id = 'spanishOptionsContainer';
+    
+    if (spanishOptionsMatching) {
+        spanishOptionsMatching.appendChild(spanishOptionsContainer);
+    }
+
+    // Add Spanish draggable options
+    const shuffledSpanishSegments = [...spanishSegments];
+    shuffleArray(shuffledSpanishSegments);
+
+    shuffledSpanishSegments.forEach(segment => {
+        const draggable = document.createElement('div');
+        draggable.className = 'draggable';
+        draggable.draggable = true;
+        draggable.textContent = segment;
+        draggable.addEventListener('click', () => speakSpanishText(segment));
+        
+        if (spanishOptionsContainer) {
+            spanishOptionsContainer.appendChild(draggable);
+        }
+    });
+
+    // Initialize drag and drop
+    if (spanishOptionsContainer) {
+        initDragAndDrop(spanishOptionsContainer);
+    }
+    
+    // Set up Check Matches button
+    if (checkMatchesBtn) {
+        checkMatchesBtn.onclick = checkMatches;
+        checkMatchesBtn.textContent = "Check Matches";
+    }
+    
+    // Create controls for mobile
+    if (isMobileDevice) {
+        const controlsDiv = document.querySelector('.controls');
+        
+        if (!controlsDiv && checkMatchesBtn) {
+            const newControlsDiv = document.createElement('div');
+            newControlsDiv.className = 'controls';
+            
+            // Move the check button
+            if (checkMatchesBtn.parentNode) {
+                checkMatchesBtn.parentNode.removeChild(checkMatchesBtn);
+            }
+            
+            newControlsDiv.appendChild(checkMatchesBtn);
+            
+            // Add to matching area
+            const matchingArea = document.querySelector('.matching-area');
+            if (matchingArea) {
+                matchingArea.appendChild(newControlsDiv);
+            }
+        }
     }
 }
 
@@ -8087,7 +8224,10 @@ function getRandomColor() {
 
 // Initialize the game on page load
 window.addEventListener('DOMContentLoaded', function() {
-    // Load the voices first (this can be asynchronous in some browsers)
+    // Set initial mobile status
+    isMobileDevice = window.innerWidth <= 768;
+    console.log("Initial isMobileDevice:", isMobileDevice);
+        // Load the voices first (this can be asynchronous in some browsers)
     if (window.speechSynthesis) {
         // Pre-load the voices
         window.speechSynthesis.getVoices();
@@ -8269,6 +8409,10 @@ window.addEventListener('DOMContentLoaded', function() {
 
 // Add resize listener to handle orientation changes
 window.addEventListener('resize', function() {
+    // Update mobile device status
+    isMobileDevice = window.innerWidth <= 768;
+    
+    console.log("Window resized, isMobileDevice:", isMobileDevice);  
     // If the matching game is visible
     if (matchingModalOverlay && matchingModalOverlay.style.display === 'flex') {
         // Reposition Spanish options
