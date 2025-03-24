@@ -642,6 +642,7 @@
            padding-bottom: 20px;
           }
         }
+    }
   </style>
 </head>
 
@@ -6424,11 +6425,11 @@
             }
           },
           {
-            english: "With Bebe's calculations, Little Hedgehog's wild invention actually worked.",
-            spanish: "Con los cálculos de Bebe, el invento loco de Pequeña Erizo realmente funcionó.",
+            english: "With feasibility from Bebe's rigorous calculations, Little Hedgehog's wild invention actually worked.",
+            spanish: "Gracias a los rigurosos cálculos de Bebe, la salvaje invención de Pequeño Erizo realmente funcionó.",
             segments: {
-              spanish: ["Con los cálculos", "de Bebe,", "el invento loco de Pequeña Erizo", "realmente funcionó."],
-              english: ["With", "Bebe's calculations,", "Little Hedgehog's wild invention", "actually worked."]
+              spanish: ["With grounding from", "rigurosos cálculos de Bebe", "la salvaje invención de Pequeño Erizo", "realmente funcionó."],
+              english: ["Gracias a los", "Bebe's calculations,", "Little Hedgehog's wild invention", "actually worked."]
             }
           },
           {
@@ -7340,6 +7341,51 @@
     const originalSentence = document.getElementById('original-sentence');
     const checkMatchesBtn = document.getElementById('check-matches-btn');
 
+    // Text-to-speech function for Spanish
+function speakSpanishText(text) {
+  if (!window.speechSynthesis) {
+    console.warn("Speech synthesis not supported in this browser");
+    return;
+  }
+
+  // Cancel any ongoing speech
+  window.speechSynthesis.cancel();
+  
+  const utterance = new SpeechSynthesisUtterance(text);
+  
+  // Try to find a Spanish voice
+  const voices = window.speechSynthesis.getVoices();
+  const spanishVoice = voices.find(voice => 
+    voice.lang.includes('es') || 
+    voice.name.includes('Spanish') || 
+    voice.name.includes('Español'));
+  
+  if (spanishVoice) {
+    utterance.voice = spanishVoice;
+  }
+  
+  utterance.lang = 'es-ES';
+  utterance.rate = 0.9; // Slightly slower for learning
+  utterance.pitch = 1;
+  
+  window.speechSynthesis.speak(utterance);
+  
+  // Add speaking class to element if it's a draggable
+  if (event && event.target && event.target.classList.contains('draggable')) {
+    const element = event.target;
+    element.classList.add('speaking');
+    
+    utterance.onend = function() {
+      element.classList.remove('speaking');
+    };
+  }
+}
+
+// Define the shuffle function
+function shuffleArray(array) {
+  // existing function code...
+}
+
     // Define the shuffle function
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
@@ -7480,8 +7526,8 @@
 
               if (options.length >= count) {
                 return options;
+                  }
               }
-            }
           }
         }
       }
@@ -7638,7 +7684,13 @@
 
     // Create a new function to prepare matching content
     function prepareMatchingContent(sentenceData) {
-      console.log("Preparing matching content");
+    console.log("prepareMatchingContent called with data:", sentenceData);
+    console.log("Current DOM elements:", {
+    englishComponents: englishComponents,
+    spanishOptionsMatching: spanishOptionsMatching,
+    matchResultMessage: matchResultMessage,
+    spanishOptionsContainer: document.getElementById('spanishOptionsContainer')
+  });
 
       if (!sentenceData || !sentenceData.segments) {
         console.warn("No segment data found");
@@ -7736,6 +7788,11 @@
           const matchingArea = document.querySelector('.matching-area');
           if (matchingArea) {
             matchingArea.appendChild(newControlsDiv);
+
+            // At the end of prepareMatchingContent
+        console.log("Matching content prepared, initializing drag and drop");
+        console.log("Spanish options container:", document.getElementById('spanishOptionsContainer'));
+        console.log("Draggable elements:", document.querySelectorAll('.draggable').length);
           }
         }
       }
@@ -7999,343 +8056,330 @@
     }
 
     // Function to ensure Spanish options are properly positioned on mobile
-    function repositionSpanishOptions() {
-        // Only apply on mobile
-        if (window.innerWidth <= 768) {
-            const spanishOptionsContainer = document.getElementById('spanishOptionsContainer');
-            const matchingArea = document.querySelector('.matching-area');
+function repositionSpanishOptions() {
+    // Only apply on mobile
+    if (window.innerWidth <= 768) {
+        const spanishOptionsContainer = document.getElementById('spanishOptionsContainer');
+        const matchingArea = document.querySelector('.matching-area');
+        
+        if (spanishOptionsContainer && matchingArea) {
+            // Make sure the container is visible
+            spanishOptionsContainer.style.display = 'flex';
+            spanishOptionsContainer.style.flexWrap = 'wrap';
+            spanishOptionsContainer.style.justifyContent = 'center';
+            spanishOptionsContainer.style.gap = '5px';  // REDUCED FROM 10px
+            spanishOptionsContainer.style.marginTop = '10px'; // REDUCED FROM 15px
+            spanishOptionsContainer.style.padding = '8px';  // REDUCED FROM 10px
+            spanishOptionsContainer.style.backgroundColor = 'rgba(255, 255, 255, 0.6)';
+            spanishOptionsContainer.style.borderRadius = '10px';
+            spanishOptionsContainer.style.zIndex = '5';
             
-            if (spanishOptionsContainer && matchingArea) {
-                // Make sure the container is visible
-                spanishOptionsContainer.style.display = 'flex';
-                spanishOptionsContainer.style.flexWrap = 'wrap';
-                spanishOptionsContainer.style.justifyContent = 'center';
-                spanishOptionsContainer.style.gap = '10px';
-                spanishOptionsContainer.style.marginTop = '15px';
-                spanishOptionsContainer.style.padding = '10px';
-                spanishOptionsContainer.style.backgroundColor = 'rgba(255, 255, 255, 0.6)';
-                spanishOptionsContainer.style.borderRadius = '10px';
-                spanishOptionsContainer.style.zIndex = '5';
-                
-                // Make sure draggable elements are visible and styled properly
-                const draggables = spanishOptionsContainer.querySelectorAll('.draggable');
-                draggables.forEach(draggable => {
-                    draggable.style.backgroundColor = '#3e3364';
-                    draggable.style.color = 'white';
-                    draggable.style.padding = '10px';
-                    draggable.style.margin = '5px';
-                    draggable.style.borderRadius = '10px';
-                    draggable.style.zIndex = '5';
-                    draggable.style.display = 'inline-block';
-                });
-            }
+            // Make sure draggable elements are visible and styled properly
+            const draggables = spanishOptionsContainer.querySelectorAll('.draggable');
+            draggables.forEach(draggable => {
+                draggable.style.backgroundColor = '#3e3364';
+                draggable.style.color = 'white';
+                draggable.style.padding = '8px';  // REDUCED FROM 10px
+                draggable.style.margin = '3px';   // REDUCED FROM 5px
+                draggable.style.borderRadius = '10px';
+                draggable.style.zIndex = '5';
+                draggable.style.display = 'inline-block';
+            });
         }
     }
+}
 
     // Initialize drag and drop functionality
-    function initDragAndDrop(container) {
-        const draggables = document.querySelectorAll('.draggable');
-
-        draggables.forEach(draggable => {
-            // Make draggable elements draggable
-            draggable.setAttribute('draggable', true);
-
-            // Pronounce when clicked
-            draggable.addEventListener('click', () => {
-                speakSpanishText(draggable.textContent);
-            });
-
-            // Handle drag start
-            draggable.addEventListener('dragstart', e => {
-                draggable.classList.add('dragging');
-                e.dataTransfer.setData('text/plain', draggable.textContent);
-                e.dataTransfer.effectAllowed = 'move';
-            });
-
-            // Handle drag end
-            draggable.addEventListener('dragend', () => {
-                draggable.classList.remove('dragging');
-            });
-        });
-
-        // Set up dropzones
-        const dropzones = document.querySelectorAll('.spanish-dropzone');
-        dropzones.forEach(dropzone => {
-            // Handle dragover
-            dropzone.addEventListener('dragover', e => {
-                e.preventDefault();
-                dropzone.classList.add('highlight');
-            });
-
-            // Handle dragleave
-            dropzone.addEventListener('dragleave', () => {
-                dropzone.classList.remove('highlight');
-            });
-
-            // Handle drop
-            dropzone.addEventListener('drop', e => {
-                e.preventDefault();
-                dropzone.classList.remove('highlight');
-
-                const draggedText = e.dataTransfer.getData('text/plain');
-                const draggable = Array.from(draggables).find(item => item.textContent === draggedText);
-
-                if (draggable) {
-                    // If dropzone already has an element, put it back
-                    if (dropzone.children.length > 0) {
-                        const existingItem = dropzone.children[0];
-                        container.appendChild(existingItem);
-                    }
-
-                    // Place the dragged item in the dropzone
-                    dropzone.appendChild(draggable);
-                    
-                    // Speak the Spanish text
-                    speakSpanishText(draggable.textContent);
-                }
-            });
-        });
-    }
-
-    // Check if the matching is correct
-    function checkMatches() {
-        console.log("Checking matches...");
-        const dropzones = document.querySelectorAll('.spanish-dropzone');
-        let allCorrect = true;
-        let allFilled = true;
-
-        dropzones.forEach(dropzone => {
-            // Check if dropzone has a child
-            if (dropzone.children.length === 0) {
-                allFilled = false;
-                return;
+function initDragAndDrop(container) {
+  console.log("initDragAndDrop called with container:", container);
+  const draggables = document.querySelectorAll('.draggable');
+  console.log("Found draggable elements:", draggables.length);
+  
+  // Add touch support for mobile devices
+  if (isMobileDevice) {
+    draggables.forEach(draggable => {
+      // Touch start handler
+      draggable.addEventListener('touchstart', function(e) {
+        console.log("Touch start on draggable");
+        // Prevent default to avoid scrolling
+        e.preventDefault();
+        
+        // Simulate a normal drag start
+        const dragEvent = new Event('dragstart');
+        dragEvent.dataTransfer = new DataTransfer();
+        dragEvent.dataTransfer.setData('text/plain', draggable.textContent);
+        draggable.dispatchEvent(dragEvent);
+        
+        // Add visual feedback
+        draggable.classList.add('dragging');
+        
+        // Track the touch position
+        const touch = e.touches[0];
+        const startX = touch.clientX;
+        const startY = touch.clientY;
+        
+        // Handle touch move
+        const touchMoveHandler = function(moveEvent) {
+          const currentTouch = moveEvent.touches[0];
+          const deltaX = currentTouch.clientX - startX;
+          const deltaY = currentTouch.clientY - startY;
+          
+          // Maybe add some visual feedback for the drag
+          draggable.style.opacity = '0.7';
+        };
+        
+        // Handle touch end
+        const touchEndHandler = function(endEvent) {
+          console.log("Touch end on draggable");
+          // Remove visual feedback
+          draggable.classList.remove('dragging');
+          draggable.style.opacity = '1';
+          
+          // Find the dropzone under the touch point
+          const endTouch = endEvent.changedTouches[0];
+          const x = endTouch.clientX;
+          const y = endTouch.clientY;
+          
+          // Find dropzone at this position
+          const dropzones = document.querySelectorAll('.spanish-dropzone');
+          let foundDropzone = null;
+          
+          dropzones.forEach(dropzone => {
+            const rect = dropzone.getBoundingClientRect();
+            if (
+              x >= rect.left && x <= rect.right &&
+              y >= rect.top && y <= rect.bottom
+            ) {
+              foundDropzone = dropzone;
             }
-
-            const spanishSegment = dropzone.children[0].textContent;
-            const correctSegment = dropzone.dataset.correct;
-
-            console.log(`Checking: '${spanishSegment}' against correct '${correctSegment}'`);
-
-            // Check if the segment matches the correct answer
-            if (spanishSegment !== correctSegment) {
-                allCorrect = false;
-                // Add visual feedback
-                dropzone.children[0].classList.add('incorrect-match');
-                setTimeout(() => {
-                    dropzone.children[0].classList.remove('incorrect-match');
-                }, 1000);
-            } else {
-                // Correct match feedback
-                dropzone.children[0].classList.add('correct-match');
+          });
+          
+          if (foundDropzone) {
+            console.log("Found dropzone for touch end");
+            // If dropzone already has an element, put it back
+            if (foundDropzone.children.length > 0) {
+              const existingItem = foundDropzone.children[0];
+              container.appendChild(existingItem);
             }
-        });
+            
+            // Move the draggable to the dropzone
+            foundDropzone.appendChild(draggable);
+            
+            // Speak the text
+            speakSpanishText(draggable.textContent);
+          }
+          
+          // Remove the touch handlers
+          document.removeEventListener('touchmove', touchMoveHandler);
+          document.removeEventListener('touchend', touchEndHandler);
+        };
+        
+        // Add the touch handlers
+        document.addEventListener('touchmove', touchMoveHandler);
+        document.addEventListener('touchend', touchEndHandler);
+      });
+    });
+  }
+  
+  // Keep the original implementation for desktop
+  draggables.forEach(draggable => {
+    // Handle drag start
+    draggable.addEventListener('dragstart', e => {
+      draggable.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', draggable.textContent);
+      e.dataTransfer.effectAllowed = 'move';
+    });
 
-        if (!allFilled) {
-            // Not all dropzones have segments
-            if (matchResultMessage) {
-                matchResultMessage.textContent = "Please place all Spanish segments in the matching boxes!";
-                matchResultMessage.style.color = "orange";
-                setTimeout(() => {
-                    matchResultMessage.textContent = "";
-                }, 2000);
-            }
-            return;
+    // Handle drag end
+    draggable.addEventListener('dragend', () => {
+      draggable.classList.remove('dragging');
+    });
+    
+    // Pronounce when clicked
+    draggable.addEventListener('click', () => {
+      speakSpanishText(draggable.textContent);
+    });
+  });
+
+  // Set up dropzones
+  const dropzones = document.querySelectorAll('.spanish-dropzone');
+  dropzones.forEach(dropzone => {
+    // Handle dragover
+    dropzone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropzone.classList.add('highlight');
+    });
+
+  // Add click handler for dropzones to improve mobile usability - ADD THIS BLOCK
+  dropzone.addEventListener('click', function() {
+    if (window.innerWidth <= 768) {
+      // Find the currently dragging element or selected element
+      const draggedElement = document.querySelector('.draggable.dragging') || 
+                            document.querySelector('.draggable.selected-item');
+      
+      if (draggedElement) {
+        // If dropzone already has an element, put it back to container
+        if (this.children.length > 0) {
+          const existingChild = this.children[0];
+          container.appendChild(existingChild);
         }
         
-        // Scroll to see the result message on mobile
-        if (window.innerWidth <= 768 && matchResultMessage) {
-            matchResultMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-
-        if (allCorrect) {
-            // Show success message
-            if (matchResultMessage) {
-                matchResultMessage.textContent = "Perfect! Great job!";
-                matchResultMessage.style.color = "green";
-            }
-
-            // Update score
-            correctCount++;
-            correctCountDisplay.textContent = correctCount;
-
-            // Show celebration
-            showCelebration();
-
-            // Load next question after delay
-            setTimeout(() => {
-                if (matchingModalOverlay) {
-                    matchingModalOverlay.style.display = 'none';
-                }
-                loadQuestion();
-            }, 2000);
-        } else {
-            // Show error message
-            if (matchResultMessage) {
-                matchResultMessage.textContent = "Not quite right. Try again!";
-                matchResultMessage.style.color = "red";
-                setTimeout(() => {
-                    matchResultMessage.textContent = "";
-                }, 2000);
-            }
-        }
+        // Move the element to the dropzone
+        this.appendChild(draggedElement);
+        
+        // Remove any classes used for visual feedback
+        draggedElement.classList.remove('dragging', 'selected-item');
+        draggedElement.style.opacity = '1';
+        
+        // Speak the Spanish text
+        speakSpanishText(draggedElement.textContent);
+      }
     }
+  });
+  
+  // Continue with existing code for dragleave, drop, etc.
 
-    // Function to speak Spanish text
-    function speakSpanishText(text) {
-        if ('speechSynthesis' in window) {
-            try {
-                // Cancel any ongoing speech
-                window.speechSynthesis.cancel();
+    // Handle dragleave
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('highlight');
+    });
 
-                // Create a new utterance
-                const utterance = new SpeechSynthesisUtterance(text);
+    // Handle drop
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropzone.classList.remove('highlight');
 
-                // Set language to Spanish
-                utterance.lang = 'es-ES';
+      const draggedText = e.dataTransfer.getData('text/plain');
+      const draggable = Array.from(draggables).find(item => item.textContent === draggedText);
 
-                // Get available voices
-                let voices = window.speechSynthesis.getVoices();
-
-                // Try to find a Spanish voice
-                const spanishVoice = voices.find(voice => voice.lang.includes('es'));
-                if (spanishVoice) {
-                    utterance.voice = spanishVoice;
-                }
-
-                // Speak the text
-                window.speechSynthesis.speak(utterance);
-            } catch (error) {
-                console.log("Speech synthesis error:", error);
-            }
+      if (draggable) {
+        // If dropzone already has an element, put it back
+        if (dropzone.children.length > 0) {
+          const existingItem = dropzone.children[0];
+          container.appendChild(existingItem);
         }
+
+        // Place the dragged item in the dropzone
+        dropzone.appendChild(draggable);
+        
+        // Speak the Spanish text
+        speakSpanishText(draggable.textContent);
+      }
+    });
+  });
+}
+
+// Add the checkMatches function here
+function checkMatches() {
+  console.log("Checking matches");
+  const dropzones = document.querySelectorAll('.spanish-dropzone');
+  let allCorrect = true;
+  let anyDropzoneEmpty = false;
+
+  // Check if all dropzones have a draggable
+  dropzones.forEach(dropzone => {
+    if (dropzone.children.length === 0) {
+      anyDropzoneEmpty = true;
     }
+  });
 
-    // Show celebration animation
-    function showCelebration() {
-        if (!celebration) return;
-
-        celebration.style.display = 'block';
-        celebration.innerHTML = '';
-
-        // Create confetti
-        for (let i = 0; i < 50; i++) {
-            const confetti = document.createElement('div');
-            confetti.className = 'confetti';
-            confetti.style.left = `${Math.random() * 100}%`;
-            confetti.style.animationDuration = `${2 + Math.random() * 2}s`;
-            confetti.style.backgroundColor = getRandomColor();
-            celebration.appendChild(confetti);
-        }
-
-        // Hide celebration after animation
-        setTimeout(function () {
-            celebration.style.display = 'none';
-        }, 4000);
+  if (anyDropzoneEmpty) {
+    // Display message to fill all dropzones
+    if (matchResultMessage) {
+      matchResultMessage.textContent = "Please fill all boxes before checking!";
+      matchResultMessage.style.color = "orange";
     }
+    return;
+  }
 
-    // Get random color for confetti
-    function getRandomColor() {
-        const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#88ff00', '#0088ff', '#ff0088'];
-        return colors[Math.floor(Math.random() * colors.length)];
+  // Check each dropzone
+  dropzones.forEach(dropzone => {
+    const correct = dropzone.dataset.correct;
+    const draggable = dropzone.children[0];
+    
+    if (draggable && draggable.textContent === correct) {
+      // Correct match
+      dropzone.classList.add('correct-match');
+      draggable.classList.add('correct-match');
+    } else {
+      // Incorrect match
+      dropzone.classList.add('incorrect-match');
+      if (draggable) {
+        draggable.classList.add('incorrect-match');
+      }
+      allCorrect = false;
     }
+  });
 
-    // Handle drag movement (missing from earlier code)
-    function dragMove(e) {
-        if (!isDragging || !clone) return;
+  // Update message
+  if (matchResultMessage) {
+    if (allCorrect) {
+      matchResultMessage.textContent = "¡Perfecto! All matches are correct!";
+      matchResultMessage.style.color = "green";
+      
+      // Disable check button
+      if (checkMatchesBtn) {
+        checkMatchesBtn.disabled = true;
+        checkMatchesBtn.textContent = "¡Muy bien!";
+      }
 
-        const dx = e.clientX - initialMouseX;
-        const dy = e.clientY - initialMouseY;
-
-        // Move the clone
-        clone.style.left = (initialElementX + dx) + 'px';
-        clone.style.top = (initialElementY + dy) + 'px';
+      // Load next question after delay
+      setTimeout(() => {
+        matchingModalOverlay.style.display = 'none';
+        loadQuestion();
+      }, 2000);
+    } else {
+      matchResultMessage.textContent = "Some matches are incorrect. Try again!";
+      matchResultMessage.style.color = "red";
+      
+      // Reset after a delay
+      setTimeout(() => {
+        dropzones.forEach(dropzone => {
+          dropzone.classList.remove('correct-match');
+          dropzone.classList.remove('incorrect-match');
+          
+          if (dropzone.children[0]) {
+            dropzone.children[0].classList.remove('correct-match');
+            dropzone.children[0].classList.remove('incorrect-match');
+          }
+        });
+        
+        matchResultMessage.textContent = "";
+      }, 1500);
     }
+  }
+}
 
-    // Handle drag end (missing from earlier code)
-    function endDrag(e) {
-        if (!isDragging) return;
-        isDragging = false;
-
-        // Remove the clone's dragging class
-        if (clone) {
-            clone.classList.remove('dragging');
-        }
-
-        // Calculate final position
-        const finalX = initialElementX + (e.clientX - initialMouseX);
-        const finalY = initialElementY + (e.clientY - initialMouseY);
-
-        // Find if there's a dropzone at this position
-        const dropped = handleDropAtPosition(finalX, finalY, element);
-
-        // Clean up
-        document.removeEventListener('mousemove', dragMove);
-        document.removeEventListener('mouseup', endDrag);
-
-        if (clone) {
-            document.body.removeChild(clone);
-            clone = null;
-        }
-
-        // Restore the original element
-        element.style.opacity = '1';
-
-        if (!dropped) {
-            // Return to container if not dropped
-            returnToContainer(element, container);
-        }
-    }
-
-    // Handle touch move (missing from earlier code)
-    function dragMoveTouch(e) {
-        if (!isDragging || !clone || e.touches.length !== 1) return;
-        e.preventDefault();
-
-        const touch = e.touches[0];
-        const dx = touch.clientX - initialMouseX;
-        const dy = touch.clientY - initialMouseY;
-
-        // Move the clone
-        clone.style.left = (initialElementX + dx) + 'px';
-        clone.style.top = (initialElementY + dy) + 'px';
-    }
-
-    // Handle touch end (missing from earlier code)
-    function endDragTouch(e) {
-        if (!isDragging) return;
-        isDragging = false;
-
-        // Get final touch position
-        let finalX = initialElementX;
-        let finalY = initialElementY;
-
-        if (e.changedTouches && e.changedTouches.length > 0) {
-            const touch = e.changedTouches[0];
-            finalX = initialElementX + (touch.clientX - initialMouseX);
-            finalY = initialElementY + (touch.clientY - initialMouseY);
-        }
-
-        // Find if there's a dropzone at this position
-        const dropped = handleDropAtPosition(finalX, finalY, element);
-
-        // Clean up
-        document.removeEventListener('touchmove', dragMoveTouch);
-        document.removeEventListener('touchend', endDragTouch);
-
-        if (clone) {
-            document.body.removeChild(clone);
-            clone = null;
-        }
-
-        // Restore the original element
-        element.style.opacity = '1';
-
-        if (!dropped) {
-            // Return to container if not dropped
-            returnToContainer(element, container);
-        }
-    }
-
+// Function to show celebration animation
+  function showCelebration() {
+  const celebrationElement = document.getElementById('celebration');
+  
+  if (!celebrationElement) return;
+  
+  // Clear previous celebration
+  celebrationElement.innerHTML = '';
+  celebrationElement.style.display = 'block';
+  
+  // Create confetti
+  const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+  
+  for (let i = 0; i < 50; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + 'vw';
+    confetti.style.animationDelay = Math.random() * 2 + 's';
+    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    
+    celebrationElement.appendChild(confetti);
+  }
+  
+  // Hide celebration after animation completes
+  setTimeout(() => {
+    celebrationElement.style.display = 'none';
+  }, 4000);
+}
+    // Set up helper functions inside the scope to ensure proper references
+    
     // Handle drop at position
     function handleDropAtPosition(x, y, element) {
         const dropzones = document.querySelectorAll('.spanish-dropzone');
@@ -8385,6 +8429,214 @@
 
         return dropped;
     }
+
+    // Return element to its container
+    function returnToContainer(element, container) {
+        if (container) {
+            container.appendChild(element);
+            element.style.position = '';
+            element.style.top = '';
+            element.style.left = '';
+            element.style.zIndex = '';
+        }
+    }
+
+    // Function to make elements draggable on both desktop and mobile
+    function makeDraggable(element, container) {
+        // Original element position for snapping back
+        let originalRect = null;
+        // Tracking variables for movement
+        let initialMouseX, initialMouseY;
+        let initialElementX, initialElementY;
+        let isDragging = false;
+        let clone = null;
+
+        // Desktop events
+        element.addEventListener('mousedown', startDrag);
+
+        // Mobile events
+        element.addEventListener('touchstart', startDragTouch, { passive: false });
+
+        function startDrag(e) {
+            e.preventDefault();
+
+            // Store original position
+            originalRect = element.getBoundingClientRect();
+            initialMouseX = e.clientX;
+            initialMouseY = e.clientY;
+            initialElementX = originalRect.left;
+            initialElementY = originalRect.top;
+
+            // Create a clone for dragging
+            clone = element.cloneNode(true);
+            clone.style.position = 'fixed';
+            clone.style.width = originalRect.width + 'px';
+            clone.style.height = originalRect.height + 'px';
+            clone.style.left = initialElementX + 'px';
+            clone.style.top = initialElementY + 'px';
+            clone.style.zIndex = '1000';
+            clone.style.opacity = '0.8';
+            clone.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+            clone.style.pointerEvents = 'none'; // Prevent the clone from intercepting events
+            clone.classList.add('dragging');
+
+            document.body.appendChild(clone);
+
+            // Make the original semi-transparent to indicate it's being moved
+            element.style.opacity = '0.4';
+
+            // Add move and end events
+            document.addEventListener('mousemove', dragMove);
+            document.addEventListener('mouseup', endDrag);
+
+            isDragging = true;
+        }
+
+        function dragMove(e) {
+            if (!isDragging || !clone) return;
+
+            const dx = e.clientX - initialMouseX;
+            const dy = e.clientY - initialMouseY;
+
+            // Move the clone
+            clone.style.left = (initialElementX + dx) + 'px';
+            clone.style.top = (initialElementY + dy) + 'px';
+        }
+
+        function endDrag(e) {
+            if (!isDragging) return;
+            isDragging = false;
+
+            // Remove the clone's dragging class
+            if (clone) {
+                clone.classList.remove('dragging');
+            }
+
+            // Calculate final position
+            const finalX = initialElementX + (e.clientX - initialMouseX);
+            const finalY = initialElementY + (e.clientY - initialMouseY);
+
+            // Find if there's a dropzone at this position
+            const dropped = handleDropAtPosition(finalX, finalY, element);
+
+            // Clean up
+            document.removeEventListener('mousemove', dragMove);
+            document.removeEventListener('mouseup', endDrag);
+
+            if (clone) {
+                document.body.removeChild(clone);
+                clone = null;
+            }
+
+            // Restore the original element
+            element.style.opacity = '1';
+
+            if (!dropped) {
+                // Return to container if not dropped
+                returnToContainer(element, container);
+            }
+        }
+
+        function startDragTouch(e) {
+            if (e.touches.length !== 1) return;
+            e.preventDefault();
+
+            const touch = e.touches[0];
+
+            // Store original position
+            originalRect = element.getBoundingClientRect();
+            initialMouseX = touch.clientX;
+            initialMouseY = touch.clientY;
+            initialElementX = originalRect.left;
+            initialElementY = originalRect.top;
+
+            // Create a clone for dragging
+            clone = element.cloneNode(true);
+            clone.style.position = 'fixed';
+            clone.style.width = originalRect.width + 'px';
+            clone.style.height = originalRect.height + 'px';
+            clone.style.left = initialElementX + 'px';
+            clone.style.top = initialElementY + 'px';
+            clone.style.zIndex = '1000';
+            clone.style.opacity = '0.8';
+            clone.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+            clone.style.pointerEvents = 'none';
+            clone.classList.add('dragging');
+
+            document.body.appendChild(clone);
+
+            // Make the original semi-transparent
+            element.style.opacity = '0.4';
+
+            // Add move and end events
+            document.addEventListener('touchmove', dragMoveTouch, { passive: false });
+            document.addEventListener('touchend', endDragTouch);
+
+            isDragging = true;
+        }
+
+        function dragMoveTouch(e) {
+            if (!isDragging || !clone || e.touches.length !== 1) return;
+            e.preventDefault();
+
+            const touch = e.touches[0];
+            const dx = touch.clientX - initialMouseX;
+            const dy = touch.clientY - initialMouseY;
+
+            // Move the clone
+            clone.style.left = (initialElementX + dx) + 'px';
+            clone.style.top = (initialElementY + dy) + 'px';
+        }
+
+        function endDragTouch(e) {
+            if (!isDragging) return;
+            isDragging = false;
+
+            // Get final touch position
+            let finalX = initialElementX;
+            let finalY = initialElementY;
+
+            if (e.changedTouches && e.changedTouches.length > 0) {
+                const touch = e.changedTouches[0];
+                finalX = initialElementX + (touch.clientX - initialMouseX);
+                finalY = initialElementY + (touch.clientY - initialMouseY);
+            }
+
+            // Find if there's a dropzone at this position
+            const dropped = handleDropAtPosition(finalX, finalY, element);
+
+            // Clean up
+            document.removeEventListener('touchmove', dragMoveTouch);
+            document.removeEventListener('touchend', endDragTouch);
+
+            if (clone) {
+                document.body.removeChild(clone);
+                clone = null;
+            }
+
+            // Restore the original element
+            element.style.opacity = '1';
+
+            if (!dropped) {
+                // Return to container if not dropped
+                returnToContainer(element, container);
+            }
+        }
+    }
+    // Get all draggable elements
+const draggables = document.querySelectorAll('.draggable');
+
+    draggables.forEach(draggable => {
+        // Make draggable with both mouse and touch support
+        makeDraggable(draggable, container);
+        
+        // Pronounce when clicked
+        draggable.addEventListener('click', () => {
+            if (!draggable.classList.contains('dragging')) {
+                speakSpanishText(draggable.textContent);
+            }
+        });
+    });
 
     // Return element to its container
     function returnToContainer(element, container) {
@@ -8503,7 +8755,47 @@
             .modal-title {
                 display: none;
             }
-            
+            /* Mobile selection highlighting */
+.draggable.selected-item {
+  background-color: #604c8d !important;
+  transform: scale(1.05);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Better touch targets on mobile */
+.spanish-dropzone, .draggable {
+  min-height: 44px; /* Apple's recommended minimum touch target */
+}
+
+/* Fix for the mobile modal scrolling */
+.matching-modal {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Make sure button is big enough for reliable tapping */
+.check-matches-btn {
+  min-height: 44px;
+  padding: 12px 20px;
+  font-size: 16px;
+}
+
+/* More space for the bottom controls */
+.matching-area {
+  padding-bottom: 100px;
+}
+
+/* Fix modal display on iOS */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+}
             /* Remove the original sentence and its container */
             .original-sentence {
                 display: none !important;
