@@ -582,11 +582,9 @@
 
       /* Optimize space in Spanish options container */
       #spanishOptionsContainer {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 5px;
-        padding: 8px;
+        gap: 5px !important; /* Reduced from 10px */
+        margin-top: 8px !important;
+        padding: 5px !important;
       }
 
       /* Ensure dropzones have proper dimensions regardless of content */
@@ -8173,11 +8171,14 @@ function initDragAndDrop(container) {
           document.removeEventListener('touchmove', touchMoveHandler);
           document.removeEventListener('touchend', touchEndHandler);
         };
+        draggable.classList.add('dragging-active');
+
         
         // Add the touch handlers
         document.addEventListener('touchmove', touchMoveHandler);
         document.addEventListener('touchend', touchEndHandler);
       });
+      draggable.classList.remove('dragging-active');
     });
   }
   
@@ -8698,10 +8699,16 @@ const draggables = document.querySelectorAll('.draggable');
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
         .draggable.dragging {
-            cursor: grabbing;
-            transform: scale(1.05);
-            z-index: 1000;
+            opacity: 0.8 !important;
+            visibility: visible !important;
+            position: relative;
+            z-index: 100;
+            background-color: #604c8d;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        .dragging-active {
+            border: 2px solid #ffcc00;
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
         }
         .spanish-dropzone {
             border: 2px dashed #85296a;
