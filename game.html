@@ -8139,12 +8139,17 @@ if (isMobileDevice) {
       const touchMoveHandler = function(moveEvent) {
   moveEvent.preventDefault();
   const touch = moveEvent.touches[0];
+  
+  // Calculate position with damping for smoother movement
   const deltaX = touch.clientX - startX;
   const deltaY = touch.clientY - startY;
   
-  // Move the clone with a transform and scale effect for better visibility
-  clone.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1.05)`;
-  clone.style.boxShadow = '0 8px 20px rgba(0,0,0,0.5)';
+  // Position clone directly under finger with a slight offset for visibility
+  clone.style.left = (touch.clientX - (clone.offsetWidth / 2)) + 'px';
+  clone.style.top = (touch.clientY - 20) + 'px'; // 20px above finger for visibility
+  
+  // Remove transform to avoid skittish behavior
+  clone.style.transform = 'none';
 };
       
       // Handle touch end
@@ -8807,7 +8812,7 @@ const draggables = document.querySelectorAll('.draggable');
 
 /* More space for the bottom controls */
 .matching-area {
-  padding-bottom: 100px;
+  padding-bottom: 10px !important;
 }
 
 /* Fix modal display on iOS */
@@ -8829,8 +8834,8 @@ const draggables = document.querySelectorAll('.draggable');
             /* Make Spanish segments visible at the bottom */
             .spanish-options-matching {
                 position: relative;
-                padding-bottom: 75px; /* Space for the check button */
-                margin-top: 20px;
+                padding-bottom: 65px; /* Space for the check button */
+                margin-top: 5px;
             }
             
             #spanishOptionsContainer {
@@ -8871,8 +8876,8 @@ const draggables = document.querySelectorAll('.draggable');
             
             /* Simplify component title */
             .component-title {
-                font-size: 1.1rem;
-                margin: 10px 0;
+    margin: 5px 0;
+    font-size: 0.9rem;
             }
             
             /* Adjust the controls position to stick to bottom */
