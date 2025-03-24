@@ -6671,11 +6671,11 @@
             }
           },
           {
-            english: "Through experimentation, they discovered new uses for fallen leaves.",
-            spanish: "Mediante experimentación, descubrieron nuevos usos para hojas caídas.",
+            english: "Through experimentation, Little Hedgehog and Bebe discovered new uses for fallen leaves.",
+            spanish: "Mediante experimentación, Pequeña Erizo y Bebe descubrieron nuevos usos para hojas caídas.",
             segments: {
-              spanish: ["Mediante", "experimentación,", "descubrieron", "nuevos usos para hojas caídas."],
-              english: ["Through", "experimentation,", "they discovered", "new uses for fallen leaves."]
+              spanish: ["Mediante experimentación", "Pequeña Erizo y Bebe,", "descubrieron nuevos usos", "para hojas caídas."],
+              english: ["Through experimentation", "Little Hedgehog and Bebe,", "discovered new uses", "for fallen leaves."]
             }
           },
           {
@@ -7220,7 +7220,7 @@
             english: "Franny's medical knowledge saved the village during the epidemic.",
             spanish: "El conocimiento médico de Franny salvó al pueblo durante la epidemia.",
             segments: {
-              spanish: ["El conocimiento médico", "de Franny", "salvó al pueblo", "durante la epidemia."],
+              spanish: ["de Franny", "El conocimiento médico", "salvó al pueblo", "durante la epidemia."],
               english: ["Franny's", "medical knowledge", "saved the village", "during the epidemic."]
             }
           },
@@ -7399,6 +7399,8 @@ function shuffleArray(array) {
       // Clear all previous content
       spanishOptions.innerHTML = '';
 
+      resetMatchingGame();
+
       // Remove any existing translation hint
       const existingHint = document.querySelector('.translation-hint');
       if (existingHint) {
@@ -7500,6 +7502,20 @@ function shuffleArray(array) {
 
       console.log(`Loaded question: Character ${currentCharacterIndex}, Sentence ${currentSentenceIndex}`);
     }
+
+    // Add this code right after loadQuestion() function
+function resetMatchingGame() {
+  // Reset the check matches button
+  if (checkMatchesBtn) {
+    checkMatchesBtn.disabled = false;
+    checkMatchesBtn.textContent = "Check Matches";
+  }
+  
+  // Clear previous match result messages
+  if (matchResultMessage) {
+    matchResultMessage.textContent = "";
+  }
+}
 
     // Get random incorrect options from other sentences
     function getRandomIncorrectOptions(count = 2) {
@@ -8082,6 +8098,7 @@ function repositionSpanishOptions() {
                 draggable.style.borderRadius = '10px';
                 draggable.style.zIndex = '5';
                 draggable.style.display = 'inline-block';
+                
             });
         }
     }
@@ -8094,93 +8111,94 @@ function initDragAndDrop(container) {
   console.log("Found draggable elements:", draggables.length);
   
   // Add touch support for mobile devices
-  if (isMobileDevice) {
-    draggables.forEach(draggable => {
-      // Touch start handler
-      draggable.addEventListener('touchstart', function(e) {
-        console.log("Touch start on draggable");
-        // Prevent default to avoid scrolling
-        e.preventDefault();
+if (isMobileDevice) {
+  draggables.forEach(draggable => {
+    draggable.addEventListener('touchstart', function(e) {
+  e.preventDefault();
+  
+  // Create a visual clone with better visibility
+  const rect = draggable.getBoundingClientRect();
+  const clone = draggable.cloneNode(true);
+  clone.style.position = 'fixed';
+  clone.style.left = rect.left + 'px';
+  clone.style.top = rect.top + 'px';
+  clone.style.width = rect.width + 'px';
+  clone.style.height = rect.height + 'px';
+  clone.style.opacity = '0.9'; // More visible
+  clone.style.zIndex = '1000';
+  clone.style.transform = 'scale(1.05)'; // Slightly larger
+  clone.style.boxShadow = '0 5px 15px rgba(0,0,0,0.4)'; // More visible shadow
+  clone.id = 'dragging-clone';
+  document.body.appendChild(clone);
+      
+      // Track original position
+      const startX = e.touches[0].clientX;
+      const startY = e.touches[0].clientY;
+      
+      // Handle touch move
+      const touchMoveHandler = function(moveEvent) {
+  moveEvent.preventDefault();
+  const touch = moveEvent.touches[0];
+  const deltaX = touch.clientX - startX;
+  const deltaY = touch.clientY - startY;
+  
+  // Move the clone with a transform and scale effect for better visibility
+  clone.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1.05)`;
+  clone.style.boxShadow = '0 8px 20px rgba(0,0,0,0.5)';
+};
+      
+      // Handle touch end
+      const touchEndHandler = function(endEvent) {
+        // Find the position where it was dropped
+        const touch = endEvent.changedTouches[0];
+        const dropX = touch.clientX;
+        const dropY = touch.clientY;
         
-        // Simulate a normal drag start
-        const dragEvent = new Event('dragstart');
-        dragEvent.dataTransfer = new DataTransfer();
-        dragEvent.dataTransfer.setData('text/plain', draggable.textContent);
-        draggable.dispatchEvent(dragEvent);
+        // Find dropzone under the touch point
+        const dropzones = document.querySelectorAll('.spanish-dropzone');
+        let targetDropzone = null;
         
-        // Add visual feedback
-        draggable.classList.add('dragging');
+        dropzones.forEach(dropzone => {
+          const rect = dropzone.getBoundingClientRect();
+          if (
+            dropX >= rect.left && dropX <= rect.right &&
+            dropY >= rect.top && dropY <= rect.bottom
+          ) {
+            targetDropzone = dropzone;
+          }
+        });
         
-        // Track the touch position
-        const touch = e.touches[0];
-        const startX = touch.clientX;
-        const startY = touch.clientY;
+        // Remove the clone
+        if (clone && clone.parentNode) {
+          clone.parentNode.removeChild(clone);
+        }
         
-        // Handle touch move
-        const touchMoveHandler = function(moveEvent) {
-          const currentTouch = moveEvent.touches[0];
-          const deltaX = currentTouch.clientX - startX;
-          const deltaY = currentTouch.clientY - startY;
-          
-          // Maybe add some visual feedback for the drag
-          draggable.style.opacity = '0.7';
-        };
-        
-        // Handle touch end
-        const touchEndHandler = function(endEvent) {
-          console.log("Touch end on draggable");
-          // Remove visual feedback
-          draggable.classList.remove('dragging');
-          draggable.style.opacity = '1';
-          
-          // Find the dropzone under the touch point
-          const endTouch = endEvent.changedTouches[0];
-          const x = endTouch.clientX;
-          const y = endTouch.clientY;
-          
-          // Find dropzone at this position
-          const dropzones = document.querySelectorAll('.spanish-dropzone');
-          let foundDropzone = null;
-          
-          dropzones.forEach(dropzone => {
-            const rect = dropzone.getBoundingClientRect();
-            if (
-              x >= rect.left && x <= rect.right &&
-              y >= rect.top && y <= rect.bottom
-            ) {
-              foundDropzone = dropzone;
-            }
-          });
-          
-          if (foundDropzone) {
-            console.log("Found dropzone for touch end");
-            // If dropzone already has an element, put it back
-            if (foundDropzone.children.length > 0) {
-              const existingItem = foundDropzone.children[0];
-              container.appendChild(existingItem);
-            }
-            
-            // Move the draggable to the dropzone
-            foundDropzone.appendChild(draggable);
-            
-            // Speak the text
-            speakSpanishText(draggable.textContent);
+        // Handle the drop
+        if (targetDropzone) {
+          // If dropzone already has content, move it back to container
+          if (targetDropzone.children.length > 0) {
+            const existingItem = targetDropzone.children[0];
+            container.appendChild(existingItem);
           }
           
-          // Remove the touch handlers
-          document.removeEventListener('touchmove', touchMoveHandler);
-          document.removeEventListener('touchend', touchEndHandler);
-        };
-        draggable.classList.add('dragging-active');
-
+          // Move element to dropzone
+          targetDropzone.appendChild(draggable);
+          
+          // Speak the Spanish text
+          speakSpanishText(draggable.textContent);
+        }
         
-        // Add the touch handlers
-        document.addEventListener('touchmove', touchMoveHandler);
-        document.addEventListener('touchend', touchEndHandler);
-      });
-      draggable.classList.remove('dragging-active');
-    });
-  }
+        // Remove event listeners
+        document.removeEventListener('touchmove', touchMoveHandler);
+        document.removeEventListener('touchend', touchEndHandler);
+      };
+      
+      // Add handlers
+      document.addEventListener('touchmove', touchMoveHandler, { passive: false });
+      document.addEventListener('touchend', touchEndHandler);
+    }, { passive: false });
+  });
+}
   
   // Keep the original implementation for desktop
   draggables.forEach(draggable => {
@@ -8877,6 +8895,41 @@ const draggables = document.querySelectorAll('.draggable');
                 display: flex;
                 flex-direction: column;
             }
+                /* Reduce spacing between match containers */
+    .match-container {
+        margin-bottom: 4px; /* Reduced from 8px */
+    }
+    
+    .spanish-dropzone {
+        min-height: 38px; /* Slightly reduced */
+        padding: 6px; /* Reduced padding */
+    }
+    
+    .english-component {
+        padding: 6px; /* Reduced padding */
+    }
+    
+    .english-components {
+        margin-bottom: 60px; /* Reduced from 100px */
+    }
+    
+    /* Reduce space between sections */
+    .matching-area {
+        gap: 10px; /* Reduced from default */
+    }
+    
+    /* Make draggables more compact */
+    .draggable {
+        padding: 8px;
+        margin: 2px;
+    }
+    
+    /* Adjust spacing for Spanish options */
+    #spanishOptionsContainer {
+        margin-top: 6px;
+        padding: 8px;
+    }
+}
         }`;
         
         document.head.appendChild(style);
