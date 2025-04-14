@@ -1,0 +1,3 @@
+# Ignore configuration files with secrets
+auth-config.js
+api-config.js
