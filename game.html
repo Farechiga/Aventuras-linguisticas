@@ -1121,7 +1121,7 @@ function fallbackBrowserSpeech(text) {
 
 <!-- Configuration files (not committed to GitHub) -->
 <script src="auth-config.js"></script>
-<script src="api-config.js"></script>
+<script src="API_CONFIG.js"></script>
 
 // Password protection functionality
 document.addEventListener('DOMContentLoaded', function() {
@@ -1140,8 +1140,24 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   // Function to check password
-  function checkPassword() {
-    if (passwordInput.value === AUTH_CONFIG.password) {
+  async function checkPassword() {
+  try {
+    // Get the password from Key Vault through your function
+    const response = await fetch('https://aventuras-api.azurewebsites.net/api/getSecretRBAC?name=GamePassword', {
+      headers: {
+        'x-functions-key': 'xgF6_KLhaiqZnqj25ImbpWdJF7Q43ymZ8iZf5TtyVt0TAzFum8e4yw' 
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to retrieve password: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    const storedPassword = data.value;
+    
+    // Now compare with input
+    if (passwordInput.value === storedPassword) {
       // Password correct - show game
       loginScreen.style.display = 'none';
       gameContainer.style.display = 'block';
@@ -1152,7 +1168,12 @@ document.addEventListener('DOMContentLoaded', function() {
       loginError.style.display = 'block';
       passwordInput.value = '';
     }
+  } catch (error) {
+    console.error("Error retrieving password:", error);
+    loginError.textContent = "Authentication error. Please try again later.";
+    loginError.style.display = 'block';
   }
+}
   
   // Add event listeners
   loginButton.addEventListener('click', checkPassword);
