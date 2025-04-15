@@ -642,9 +642,25 @@
         }
     }
   </style>
+  <script src="https://aka.ms/csspeech/jsbrowserpackage"></script>
 </head>
 
 <body>
+  <div id="login-screen" class="login-container">
+    <div class="login-content">
+      <div class="logo-wrapper">
+        <img src="Aventuras_Linguisticas_Logo.png" alt="¡Aventuras lingüísticas!" class="login-logo">
+      </div>
+      <p>Please enter the password to access the language learning game:</p>
+      <input type="password" id="password-input" placeholder="Enter password">
+      <button id="login-button">Enter</button>
+      <p id="login-error" style="color: red; display: none;">Incorrect password. Please try again.</p>
+    </div>
+  </div>
+      
+      <div id="game-container" style="display: none;">
+        <!-- Your existing game content goes here -->
+      </div>
   <div class="game-container">
     <!-- Logo Container - Centered with responsive sizing -->
     <div class="logo-container">
@@ -655,6 +671,89 @@
 
     <!-- Add this to your existing CSS in the <style> section -->
     <style>
+      .login-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(45deg, #7ABFFF, #8CA9F2, #9B93E7, #B07BDC, #C462D0, #DA47C3);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+
+
+.login-container h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.logo-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.login-logo {
+  width: 350px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.login-container p {
+  margin-bottom: 20px;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.login-container input {
+  padding: 10px 15px;
+  border-radius: 20px;
+  border: none;
+  margin-bottom: 15px;
+  width: 250px;
+  font-size: 16px;
+}
+
+.login-container button {
+  padding: 10px 30px;
+  border-radius: 20px;
+  border: none;
+  background-color: #85296a;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.login-container button:hover {
+  background-color: #6a2055;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+.login-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 90%;
+}
+
+.logo-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 30px;
+}
       /* Logo styling */
       .logo-container {
         width: 100%;
@@ -725,6 +824,12 @@
               /* Important - allows rotated content to extend beyond the container */
               pointer-events: none;
               /* So it doesn't interfere with gameplay */
+            }
+
+            .login-logo {
+              width: 350px;
+              max-width: 100%;
+              margin-bottom: 30px;
             }
 
             @media (max-width: 768px) {
@@ -847,6 +952,283 @@
   <div class="celebration" id="celebration"></div>
 
   <script>
+
+const API_CONFIG = {
+  keyVaultUrl: "https://aventuras-vault.vault.azure.net/"
+};
+
+// Azure Speech Service Configuration
+const azureSpeechConfig = {
+  // Replace with your actual key and region from Azure portal
+  key: "YOUR_SPEECH_KEY_HERE", 
+  region: "eastus",
+  
+  // Array of Spanish voice options
+  spanishVoices: [
+    { name: "es-MX-BeatrizNeural", gender: "female" },
+    { name: "es-MX-LarissaNeural", gender: "female" },
+    { name: "es-MX-DaliaNeural", gender: "female" },
+    { name: "es-MX-CarlotaNeural", gender: "female" },
+    { name: "es-MX-CandelaNeural", gender: "female" },
+    { name: "es-MX-JorgeNeural", gender: "male" },
+    { name: "es-MX-LibertoNeural", gender: "male" },
+    { name: "es-MX-LucianoNeural", gender: "male" },
+    { name: "es-MX-PelayoNeural", gender: "male" },
+    { name: "es-MX-NuriaNeural", gender: "female" },
+    { name: "es-MX-RenataNeural", gender: "female" },
+    { name: "es-MX-MarinaNeural", gender: "female" },
+    { name: "es-MX-CecilioNeural", gender: "male" },
+    { name: "es-MX-YagoNeural", gender: "male" },
+    { name: "es-MX-GerardoNeural", gender: "male" },
+    { name: "es-MX-MarinaNeural", gender: "female" },
+    { name: "es-ES-XimenaNeural", gender: "female" },
+    { name: "es-ES-AbrilNeural", gender: "female" },
+    { name: "es-ES-ArabellaNeural", gender: "female" },
+    { name: "es-ES-IsidoraNeural", gender: "female" },
+    { name: "es-ES-LaiaNeural", gender: "female" },
+    { name: "es-ES-EstrellaNeural", gender: "female" },
+    { name: "es-ES-DarioNeural", gender: "male" },
+    { name: "es-ES-ArnauNeural", gender: "male" },
+    { name: "es-ES-SaulNeural", gender: "male" },
+    { name: "es-CO-GonzaloNeural", gender: "male" },
+    { name: "es-CO-SalomeNeural", gender: "female" },
+
+
+  ]
+};
+
+// Function to get a random voice from the array
+function getRandomAzureVoice() {
+  const randomIndex = Math.floor(Math.random() * azureSpeechConfig.spanishVoices.length);
+  return azureSpeechConfig.spanishVoices[randomIndex];
+}
+
+// New Azure TTS function to replace the browser's built-in speech synthesis
+function speakSpanishText(text) {
+  try {
+    // Check if Azure Speech SDK is available
+    if (!window.SpeechSDK) {
+      console.warn("Azure Speech SDK not loaded, falling back to browser speech synthesis");
+      fallbackBrowserSpeech(text);
+      return;
+    }
+    
+    // Select a random voice
+    const selectedVoice = getRandomAzureVoice();
+    console.log(`Using voice: ${selectedVoice.name}`);
+    
+    // Create speech configuration
+    const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(
+      azureSpeechConfig.key, 
+      azureSpeechConfig.region
+    );
+    
+    // Create synthesizer
+    const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig);
+    
+    // Create SSML for more control
+    const ssml = `
+      <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="es-ES">
+        <voice name="${selectedVoice.name}">
+          <prosody rate="0.9">
+            ${text}
+          </prosody>
+        </voice>
+      </speak>
+    `;
+    
+    // Add speaking class to element if it's a draggable
+    let element = null;
+    if (event && event.target && event.target.classList.contains('draggable')) {
+      element = event.target;
+      element.classList.add('speaking');
+    }
+    
+    // Speak using SSML
+    synthesizer.speakSsmlAsync(
+      ssml,
+      result => {
+        // Success callback
+        console.log(`Speech synthesis completed with voice: ${selectedVoice.name}`);
+        
+        // Remove speaking class if applicable
+        if (element) {
+          element.classList.remove('speaking');
+        }
+        
+        synthesizer.close();
+      },
+      error => {
+        // Error callback
+        console.error('Speech synthesis error:', error);
+        
+        // Remove speaking class if applicable
+        if (element) {
+          element.classList.remove('speaking');
+        }
+        
+        synthesizer.close();
+        
+        // Fall back to browser speech on error
+        fallbackBrowserSpeech(text);
+      }
+    );
+  } catch (err) {
+    console.error("Error with Azure speech synthesis:", err);
+    fallbackBrowserSpeech(text);
+  }
+}
+
+// Fallback function to use browser's built-in speech synthesis if Azure fails
+function fallbackBrowserSpeech(text) {
+  if (!window.speechSynthesis) {
+    console.warn("Speech synthesis not supported in this browser");
+    return;
+  }
+
+  // Cancel any ongoing speech
+  window.speechSynthesis.cancel();
+  
+  const utterance = new SpeechSynthesisUtterance(text);
+  
+  // Try to find a Spanish voice
+  const voices = window.speechSynthesis.getVoices();
+  const spanishVoice = voices.find(voice => 
+    voice.lang.includes('es') || 
+    voice.name.includes('Spanish') || 
+    voice.name.includes('Español'));
+  
+  if (spanishVoice) {
+    utterance.voice = spanishVoice;
+  }
+  
+  utterance.lang = 'es-ES';
+  utterance.rate = 0.9; // Slightly slower for learning
+  utterance.pitch = 1;
+  
+  window.speechSynthesis.speak(utterance);
+  
+  // Add speaking class to element if it's a draggable
+  if (event && event.target && event.target.classList.contains('draggable')) {
+    const element = event.target;
+    element.classList.add('speaking');
+    
+    utterance.onend = function() {
+      element.classList.remove('speaking');
+    };
+  }
+}
+
+<!-- Configuration files (not committed to GitHub) -->
+<script src="auth-config.js"></script>
+<script src="api-config.js"></script>
+
+// Password protection functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const loginScreen = document.getElementById('login-screen');
+  const gameContainer = document.getElementById('game-container');
+  const passwordInput = document.getElementById('password-input');
+  const loginButton = document.getElementById('login-button');
+  const loginError = document.getElementById('login-error');
+  
+  // Check if configuration is loaded
+  if (typeof AUTH_CONFIG === 'undefined') {
+    console.error("Authentication configuration not found!");
+    loginError.textContent = "Game configuration error. Please contact administrator.";
+    loginError.style.display = 'block';
+    return;
+  }
+  
+  // Function to check password
+  function checkPassword() {
+    if (passwordInput.value === AUTH_CONFIG.password) {
+      // Password correct - show game
+      loginScreen.style.display = 'none';
+      gameContainer.style.display = 'block';
+      // Initialize Azure Speech
+      initializeAzureSpeech();
+    } else {
+      // Password incorrect - show error
+      loginError.style.display = 'block';
+      passwordInput.value = '';
+    }
+  }
+  
+  // Add event listeners
+  loginButton.addEventListener('click', checkPassword);
+  passwordInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      checkPassword();
+    }
+  });
+});
+
+// Azure initialization function
+async function initializeAzureSpeech() {
+  try {
+    // Get the speech key from your secure endpoint
+    const response = await fetch('https://aventuras-api.azurewebsites.net/api/getSecretRBAC?name=SpeechApiKey', {
+      headers: {
+        'x-functions-key': 'xgF6_KLhaiqZnqj25ImbpWdJF7Q43ymZ8iZf5TtyVt0TAzFum8e4yw=='
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to retrieve speech key: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    azureSpeechConfig.key = data.value;
+    console.log("Azure Speech initialized successfully");
+  } catch (error) {
+    console.error("Failed to initialize Azure Speech:", error);
+  }
+}
+
+async function getSecretFromSecureEndpoint(secretName) {
+    try {
+        // Call your secure Azure Function to get the secret
+        const response = await fetch(`https://aventuras-api.azurewebsites.net/api/getSecret?name=${secretName}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Failed to retrieve secret: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return data.value;
+    } catch (error) {
+        console.error("Error retrieving secret:", error);
+        throw error;
+    }
+}
+
+// Helper function to make authenticated API calls to Azure Functions
+async function callAventuraApi(endpoint, method = 'GET', data = null) {
+  try {
+    // Use the key directly from the config (which gets it from SECRETS)
+    const apiKey = API_CONFIG.functionKey;
+        
+        // Add body data if provided
+        if (data && (method === 'POST' || method === 'PUT')) {
+            options.body = JSON.stringify(data);
+        }
+        
+        const response = await fetch(apiUrl, options);
+        if (!response.ok) {
+            throw new Error(`API call failed: ${response.status}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('API call error:', error);
+        throw error;
+    }
+}
 
     // Translation data
     const translationData = [
