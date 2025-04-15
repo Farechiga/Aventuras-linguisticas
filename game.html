@@ -1190,12 +1190,11 @@ async function initializeAzureSpeech() {
 
 async function getSecretFromSecureEndpoint(secretName) {
     try {
-        // Try with credentials mode and proper headers
-        const response = await fetch(`https://aventuras-api.azurewebsites.net/api/getSecretFunction?name=${secretName}`, {
+        // Use key as query parameter only
+        const response = await fetch(`https://aventuras-api.azurewebsites.net/api/getSecretFunction?name=${secretName}&code=E4-GRuk9YPOXCV42OyF4ciV2-UJrTBTrgW0K0cOaS1wvAzFuCQox9A==`, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
-                'x-functions-key': 'E4-GRuk9YPOXCV42OyF4ciV2-UJrTBTrgW0K0cOaS1wvAzFuCQox9A=='
+                'Content-Type': 'application/json'
             },
             credentials: 'include',
             mode: 'cors'
