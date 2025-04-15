@@ -1165,14 +1165,14 @@ const loginError = document.getElementById('login-error');
 async function initializeAzureSpeech() {
   try {
     // Get the speech key from your secure endpoint
-    const response = await fetch(`https://aventuras-api.azurewebsites.net/api/getSecretRBAC?name=${secretName}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-functions-key': 'E4-GRuk9YPOXCV42OyF4ciV2-UJrTBTrgW0K0cOaS1wvAzFuCQox9A=='  // Use aventurasappkey from your screenshot
-    },
-    mode: 'cors'
-});
+    const response = await fetch(`https://aventuras-api.azurewebsites.net/api/getSecretFunction?name=SpeechApiKey`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-functions-key': 'E4-GRuk9YPOXCV42OyF4ciV2-UJrTBTrgW0K0cOaS1wvAzFuCQox9A=='  // Use aventurasappkey from your screenshot
+      },
+      mode: 'cors'
+    });
     
     if (!response.ok) {
       throw new Error(`Failed to retrieve speech key: ${response.status}`);
@@ -1180,20 +1180,25 @@ async function initializeAzureSpeech() {
     
     const data = await response.json();
     azureSpeechConfig.key = data.value;
+    
     console.log("Azure Speech initialized successfully");
   } catch (error) {
     console.error("Failed to initialize Azure Speech:", error);
+    // Continue without speech functionality - graceful degradation
   }
 }
 
 async function getSecretFromSecureEndpoint(secretName) {
     try {
-        // Call your secure Azure Function to get the secret
-        const response = await fetch(`https://aventuras-api.azurewebsites.net/api/getSecret?name=${secretName}`, {
+        // Try with credentials mode and proper headers
+        const response = await fetch(`https://aventuras-api.azurewebsites.net/api/getSecretFunction?name=${secretName}`, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json'
-            }
+                'Content-Type': 'application/json',
+                'x-functions-key': 'E4-GRuk9YPOXCV42OyF4ciV2-UJrTBTrgW0K0cOaS1wvAzFuCQox9A=='
+            },
+            credentials: 'include',
+            mode: 'cors'
         });
         
         if (!response.ok) {
@@ -1204,6 +1209,24 @@ async function getSecretFromSecureEndpoint(secretName) {
         return data.value;
     } catch (error) {
         console.error("Error retrieving secret:", error);
+        
+        // If testing locally with file:// protocol, we can create a fallback
+        // This is for DEVELOPMENT ONLY and should be removed in production
+        if (window.location.protocol === 'file:') {
+            console.warn("Running in local file mode - using development fallback values");
+            
+            // Fallback values for development only
+            const devFallbacks = {
+                'GamePassword': 'aventuras2024',
+                'SpeechApiKey': 'your-dev-speech-key-here'
+            };
+            
+            if (secretName in devFallbacks) {
+                console.log(`Using development fallback for ${secretName}`);
+                return devFallbacks[secretName];
+            }
+        }
+        
         throw error;
     }
 }
