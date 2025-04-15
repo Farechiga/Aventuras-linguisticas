@@ -1165,11 +1165,14 @@ const loginError = document.getElementById('login-error');
 async function initializeAzureSpeech() {
   try {
     // Get the speech key from your secure endpoint
-    const response = await fetch('https://aventuras-api.azurewebsites.net/api/getSecretRBAC?name=SpeechApiKey', {
-      headers: {
-        'x-functions-key': 'xgF6_KLhaiqZnqj25ImbpWdJF7Q43ymZ8iZf5TtyVt0TAzFum8e4yw=='
-      }
-    });
+    const response = await fetch(`https://aventuras-api.azurewebsites.net/api/getSecretRBAC?name=${secretName}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-functions-key': 'E4-GRuk9YPOXCV42OyF4ciV2-UJrTBTrgW0K0cOaS1wvAzFuCQox9A=='  // Use aventurasappkey from your screenshot
+    },
+    mode: 'cors'
+});
     
     if (!response.ok) {
       throw new Error(`Failed to retrieve speech key: ${response.status}`);
