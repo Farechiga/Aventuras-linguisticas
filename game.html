@@ -954,10 +954,10 @@
   <script>
 
 const API_CONFIG = {
-  keyVaultUrl: "https://aventuras-vault.vault.azure.net/",
-  keyVaultSecretName: "GamePassword",  // Secret name for the game password
-  functionKeySecretName: "SpeechApiKey", // Secret name for function key
-  speechKeyVaultSecretName: "SpeechApiKey" // Secret name for speech API
+  functionUrl: "https://aventuras-api.azurewebsites.net/api/getSecretFunction",  // Add this line
+  keyVaultSecretName: "GamePassword",    // Keep this
+  functionKeySecretName: "SpeechApiKey", // Keep this
+  speechKeyVaultSecretName: "SpeechApiKey" // Keep this
 };
 
 // Azure Speech Service Configuration
