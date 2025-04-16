@@ -1147,22 +1147,23 @@ async function checkPassword() {
       // Password correct - show game
       loginScreen.style.display = 'none';
       gameContainer.style.display = 'block';
-  
-// Define DOM elements needed for login
-const loginButton = document.getElementById('login-button');
-const loginScreen = document.getElementById('login-screen');
-const gameContainer = document.getElementById('game-container');
-const passwordInput = document.getElementById('password-input');
-const loginError = document.getElementById('login-error');
-
-  // Add event listeners
-  loginButton.addEventListener('click', checkPassword);
-  passwordInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      checkPassword();
+      
+      // Initialize Azure Speech
+      initializeAzureSpeech();
+    } else {
+      // Password incorrect - show error
+      loginError.style.display = 'block';
+      passwordInput.value = '';
     }
+  } catch (error) {
+    console.error("Failed to verify password:", error);
+    
+    // Show error message to user
+    const loginError = document.getElementById('login-error');
+    loginError.textContent = "Game configuration error. Please contact administrator.";
+    loginError.style.display = 'block';
   }
-  );
+}
 
 // Azure initialization function
 async function initializeAzureSpeech() {
@@ -1174,10 +1175,13 @@ async function initializeAzureSpeech() {
         'Content-Type': 'application/json'
       }
     });
+    
     if (!response.ok) {
-      throw new Error(Failed to retrieve speech key: ${response.status});
+      throw new Error(`Failed to retrieve speech key: ${response.status}`);
     }
+    
     const data = await response.json();
+    
     if (data.success) {
       // Set the key in your azureSpeechConfig object
       azureSpeechConfig.key = data.key;
