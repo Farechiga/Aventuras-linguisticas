@@ -1194,8 +1194,10 @@ async function checkPassword() {
     
     if (!passwordInput || !passwordInput.value) {
       const loginError = document.getElementById('login-error');
-      loginError.textContent = "Please enter a password.";
-      loginError.style.display = 'block';
+      if (loginError) {
+        loginError.textContent = "Please enter a password.";
+        loginError.style.display = 'block';
+      }
       return;
     }
     
@@ -1206,53 +1208,54 @@ async function checkPassword() {
       loginButton.textContent = "Verifying...";
     }
     
-    // Call your secure API to verify the password
-    const response = await fetch('https://aventuras-api.azurewebsites.net/api/verify-password', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ password: passwordInput.value }),
-      credentials: 'include' // Include credentials for cookies
-    });
+    // Prepare URL and data for API call
+    try {
+      const data = { password: passwordInput.value };
+      const response = await callAventuraApi('/api/verify-password', 'POST', data);
+      
+      // Get DOM elements needed for UI updates
+      const loginScreen = document.getElementById('login-screen');
+      const gameContainer = document.getElementById('game-container');
+      const loginError = document.getElementById('login-error');
+      
+      if (response.success) {
+        // Store session token if provided
+        if (response.token) {
+          localStorage.setItem('aventuraSessionToken', response.token);
+        }
+        
+        // Password correct - show game
+        if (loginScreen) loginScreen.style.display = 'none';
+        if (gameContainer) gameContainer.style.display = 'block';
+        
+        // Initialize Azure Speech
+        await initializeAzureSpeech();
+        
+        // Load first question
+        loadQuestion();
+      } else {
+        // Password incorrect - show error
+        if (loginError) {
+          loginError.textContent = response.message || "Incorrect password. Please try again.";
+          loginError.style.display = 'block';
+        }
+        if (passwordInput) passwordInput.value = '';
+      }
+    } catch (error) {
+      console.error("API call failed:", error);
+      
+      // Show error message
+      const loginError = document.getElementById('login-error');
+      if (loginError) {
+        loginError.textContent = "Connection error. Please try again later.";
+        loginError.style.display = 'block';
+      }
+    }
     
     // Reset button state
     if (loginButton) {
       loginButton.disabled = false;
       loginButton.textContent = "Enter";
-    }
-    
-    if (!response.ok) {
-      throw new Error(`API returned status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    // Get DOM elements needed for UI updates
-    const loginScreen = document.getElementById('login-screen');
-    const gameContainer = document.getElementById('game-container');
-    const loginError = document.getElementById('login-error');
-    
-    if (data.success) {
-      // Store session token if provided
-      if (data.token) {
-        localStorage.setItem('aventuraSessionToken', data.token);
-      }
-      
-      // Password correct - show game
-      loginScreen.style.display = 'none';
-      gameContainer.style.display = 'block';
-      
-      // Initialize Azure Speech
-      await initializeAzureSpeech();
-      
-      // Load first question
-      loadQuestion();
-    } else {
-      // Password incorrect - show error
-      loginError.textContent = data.message || "Incorrect password. Please try again.";
-      loginError.style.display = 'block';
-      passwordInput.value = '';
     }
   } catch (error) {
     console.error("Failed to verify password:", error);
@@ -1266,8 +1269,10 @@ async function checkPassword() {
     
     // Show error message to user
     const loginError = document.getElementById('login-error');
-    loginError.textContent = "Connection error. Please try again or contact administrator.";
-    loginError.style.display = 'block';
+    if (loginError) {
+      loginError.textContent = "An error occurred. Please try again.";
+      loginError.style.display = 'block';
+    }
   }
 }
 
@@ -1279,23 +1284,40 @@ async function verifySession() {
     
     if (!sessionToken) {
       // No token found, user needs to log in
+      console.log("No session token found, login required");
       return false;
     }
     
-    // Verify the token with the backend
-    const response = await callAventuraApi(API_CONFIG.endpoints.verifySession, 'GET');
-    
-    if (!response.success || !response.valid) {
-      // Session is invalid or expired
+    try {
+      // Verify the token with the backend
+      const response = await callAventuraApi('/api/verify-session', 'GET');
+      
+      if (!response || !response.success || !response.valid) {
+        // Session is invalid or expired
+        console.log("Session token is invalid or expired");
+        localStorage.removeItem('aventuraSessionToken');
+        return false;
+      }
+      
+      // Session is valid
+      console.log("Session token verified successfully");
+      return true;
+    } catch (apiError) {
+      // Handle API errors
+      console.error("Session verification API error:", apiError);
+      
+      // If server returns 401, session is definitely expired
+      if (apiError.message && apiError.message.includes('401')) {
+        console.log("Server rejected the session token");
+      }
+      
+      // Clear the invalid token
       localStorage.removeItem('aventuraSessionToken');
       return false;
     }
-    
-    // Session is valid
-    return true;
-  } catch (error) {
-    console.error('Session verification error:', error);
-    // On error, assume session is invalid
+  } catch (generalError) {
+    // Handle unexpected errors
+    console.error("Unexpected error during session verification:", generalError);
     localStorage.removeItem('aventuraSessionToken');
     return false;
   }
@@ -1352,13 +1374,12 @@ function handleSessionExpired() {
 }
 
 // Azure initialization function
-// Azure initialization function
 async function initializeAzureSpeech() {
   try {
     // First check if SDK is loaded
     const sdkLoaded = await ensureSpeechSDK(3);
     if (!sdkLoaded) {
-      console.warn("Azure Speech SDK not loaded, falling back to browser speech synthesis");
+      console.warn("Azure Speech SDK not loaded, speech functionality unavailable");
       return false;
     }
     
@@ -1369,26 +1390,30 @@ async function initializeAzureSpeech() {
       return false;
     }
     
-    // Get the speech key from secure API endpoint using our helper function
-    const response = await callAventuraApi(API_CONFIG.endpoints.getSpeechKey, 'GET');
-    
-    if (!response.success) {
-      throw new Error(`Failed to retrieve speech key: ${response.message}`);
+    // Get the speech key from secure API endpoint
+    try {
+      const response = await callAventuraApi('/api/get-speech-key', 'GET');
+      
+      if (!response.success) {
+        throw new Error(`Failed to retrieve speech key: ${response.message}`);
+      }
+      
+      // Set the key in your azureSpeechConfig object
+      azureSpeechConfig.key = response.key;
+      console.log("Azure Speech initialized successfully");
+      return true;
+    } catch (error) {
+      console.error("Failed to retrieve speech key:", error);
+      
+      // Check if this is a session expired error
+      if (error.message && error.message.includes('401')) {
+        handleSessionExpired();
+      }
+      
+      return false;
     }
-    
-    // Set the key in your azureSpeechConfig object
-    azureSpeechConfig.key = response.key;
-    console.log("Azure Speech initialized successfully");
-    return true;
   } catch (error) {
     console.error("Failed to initialize Azure Speech:", error);
-    
-    // Check if this is a session expired error
-    if (error.message && error.message.includes('401')) {
-      handleSessionExpired();
-    }
-    
-    // Continue without speech functionality - graceful degradation
     return false;
   }
 }
@@ -13535,108 +13560,112 @@ async function callAventuraApi(endpoint, method = 'GET', data = null) {
     const originalSentence = document.getElementById('original-sentence');
     const checkMatchesBtn = document.getElementById('check-matches-btn');
 
-    // Text-to-speech function for Spanish
-    function speakSpanishText(text) {
+// Function to speak Spanish text using Azure Speech Service
+function speakSpanishText(text) {
   try {
+    // Validate input
+    if (!text || typeof text !== 'string') {
+      console.error("Invalid text input for speech synthesis");
+      return;
+    }
+
     // Check if Azure Speech SDK is available
-    if (!window.SpeechSDK || !azureSpeechConfig.key) {
-      console.warn("Azure Speech SDK not loaded or key not set, falling back to browser speech synthesis");
+    if (!window.SpeechSDK) {
+      console.error("Azure Speech SDK not loaded. Speech functionality unavailable.");
+      return;
+    }
+
+    // Check if we have an API key
+    if (!azureSpeechConfig.key) {
+      console.error("Azure Speech API key not available. Speech functionality unavailable.");
       return;
     }
     
-    // Select a random voice
-    const selectedVoice = getRandomAzureVoice();
-    console.log(`Using voice: ${selectedVoice.name}`);
-    
-    // Create speech configuration
-    const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(
-      azureSpeechConfig.key, 
-      azureSpeechConfig.region
-    );
-    
-    // Create synthesizer
-    const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig);
-    
-    // Create SSML for more control
-    const ssml = `
-      <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="es-ES">
-        <voice name="${selectedVoice.name}">
-          <prosody rate="0.9">
-            ${text}
-          </prosody>
-        </voice>
-      </speak>
-    `;
-    
-    // Add speaking class to element if it's a draggable
-    let element = null;
-    if (event && event.target && event.target.classList.contains('draggable')) {
-      element = event.target;
-      element.classList.add('speaking');
-    }
-    
-    // Speak using SSML
-    synthesizer.speakSsmlAsync(
-      ssml,
-      result => {
-        // Success callback
-        console.log(`Speech synthesis completed with voice: ${selectedVoice.name}`);
-        
-        // Remove speaking class if applicable
-        if (element) {
-          element.classList.remove('speaking');
-        }
-        
-        synthesizer.close();
-      },
-      error => {
-        // Error callback
-        console.error('Speech synthesis error:', error);
-        
-        // Remove speaking class if applicable
-        if (element) {
-          element.classList.remove('speaking');
-        }
-        
-        synthesizer.close();
-        
-        // Fall back to browser speech on error
+    // Try Azure Speech synthesis
+    try {
+      // Select a random voice
+      const selectedVoice = getRandomAzureVoice();
+      console.log(`Using voice: ${selectedVoice.name}`);
+      
+      // Create speech configuration
+      const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(
+        azureSpeechConfig.key, 
+        azureSpeechConfig.region
+      );
+      
+      // Create synthesizer
+      const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig);
+      
+      // Create SSML for more control
+      const ssml = `
+        <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="es-ES">
+          <voice name="${selectedVoice.name}">
+            <prosody rate="0.9">
+              ${text}
+            </prosody>
+          </voice>
+        </speak>
+      `;
+      
+      // Add speaking class to element if it's a draggable
+      let element = null;
+      if (event && event.target && event.target.classList.contains('draggable')) {
+        element = event.target;
+        element.classList.add('speaking');
       }
-    );
-  } catch (err) {
-    console.error("Error with Azure speech synthesis:", err);  }
-}
-
-  // Cancel any ongoing speech
-  window.speechSynthesis.cancel();
-  
-  const utterance = new SpeechSynthesisUtterance(text);
-  
-  // Try to find a Spanish voice
-  const voices = window.speechSynthesis.getVoices();
-  const spanishVoice = voices.find(voice => 
-    voice.lang.includes('es') || 
-    voice.name.includes('Spanish') || 
-    voice.name.includes('Español'));
-  
-  if (spanishVoice) {
-    utterance.voice = spanishVoice;
-  }
-  
-  utterance.lang = 'es-ES';
-  utterance.rate = 0.9; // Slightly slower for learning
-  utterance.pitch = 1;
-  
-  window.speechSynthesis.speak(utterance);
-  
-  // Add speaking class to element if it's a draggable
-  if (event && event.target && event.target.classList.contains('draggable')) {
-    const element = event.target;
-    element.classList.add('speaking');
-    
-    utterance.onend = function() {
-      element.classList.remove('speaking');
-    };
+      
+      // Speak using SSML
+      synthesizer.speakSsmlAsync(
+        ssml,
+        result => {
+          // Success callback
+          console.log(`Speech synthesis completed with voice: ${selectedVoice.name}`);
+          
+          // Remove speaking class if applicable
+          if (element) {
+            element.classList.remove('speaking');
+          }
+          
+          synthesizer.close();
+        },
+        error => {
+          // Error callback
+          console.error('Azure speech synthesis error:', error);
+          
+          // Remove speaking class if applicable
+          if (element) {
+            element.classList.remove('speaking');
+          }
+          
+          synthesizer.close();
+          
+          // If this was a token or authorization error, try to refresh the speech key
+          if (error && (error.toString().includes('401') || error.toString().includes('403'))) {
+            console.log("Speech authorization error, attempting to refresh the speech key");
+            initializeAzureSpeech().then(success => {
+              if (success) {
+                console.log("Speech key refreshed successfully");
+              } else {
+                console.error("Failed to refresh speech key");
+              }
+            });
+          }
+        }
+      );
+    } catch (azureError) {
+      console.error("Azure speech synthesis exception:", azureError);
+      
+      // If this might be an API key or token issue, try to refresh
+      if (azureError.toString().includes('key') || azureError.toString().includes('token')) {
+        initializeAzureSpeech().then(success => {
+          if (success) {
+            console.log("Speech service reinitialized successfully");
+          }
+        });
+      }
+    }
+  } catch (generalError) {
+    console.error("General error in speech synthesis:", generalError);
   }
 }
 
@@ -14934,6 +14963,67 @@ const draggables = document.querySelectorAll('.draggable');
         }
     }
 
+// Function to verify if the current session is valid
+async function verifySession() {
+  try {
+    // Check if we have a stored token
+    const sessionToken = localStorage.getItem('aventuraSessionToken');
+    
+    if (!sessionToken) {
+      // No token found, user needs to log in
+      return false;
+    }
+    
+    // Verify the token with the backend
+    try {
+      const response = await callAventuraApi('/api/verify-session', 'GET');
+      
+      if (!response.success || !response.valid) {
+        // Session is invalid or expired
+        localStorage.removeItem('aventuraSessionToken');
+        return false;
+      }
+      
+      // Session is valid
+      return true;
+    } catch (error) {
+      console.error('Session verification error:', error);
+      localStorage.removeItem('aventuraSessionToken');
+      return false;
+    }
+  } catch (error) {
+    console.error('Session verification error:', error);
+    // On error, assume session is invalid
+    localStorage.removeItem('aventuraSessionToken');
+    return false;
+  }
+}
+
+// Function to handle session expiration
+function handleSessionExpired() {
+  // Hide game container
+  const gameContainer = document.getElementById('game-container');
+  if (gameContainer) {
+    gameContainer.style.display = 'none';
+  }
+  
+  // Show login screen
+  const loginScreen = document.getElementById('login-screen');
+  if (loginScreen) {
+    loginScreen.style.display = 'flex';
+  }
+  
+  // Show session expired message
+  const loginError = document.getElementById('login-error');
+  if (loginError) {
+    loginError.textContent = "Your session has expired. Please log in again.";
+    loginError.style.display = 'block';
+  }
+  
+  // Clear stored token
+  localStorage.removeItem('aventuraSessionToken');
+}
+
 // Initialize the game on page load
 window.addEventListener('DOMContentLoaded', async function () {
   // Set initial mobile status
@@ -15317,7 +15407,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Start the game
         loadQuestion();
-      
+}
   </script>
 </body>
 </html>
