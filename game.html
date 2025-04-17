@@ -951,10 +951,12 @@
   <script>
 
 const API_CONFIG = {
-  functionUrl: "https://aventuras-api.azurewebsites.net/api/getSecretFunction",  // Add this line
-  keyVaultSecretName: "GamePassword",    // Keep this
-  functionKeySecretName: "SpeechApiKey", // Keep this
-  speechKeyVaultSecretName: "SpeechApiKey" // Keep this
+  baseUrl: "https://aventuras-api.azurewebsites.net",
+  endpoints: {
+    verifyPassword: "/api/verify-password",
+    verifySession: "/api/verify-session",
+    getSpeechKey: "/api/get-speech-key"
+  }
 };
 
 // Define spanishOptions if it doesn't exist
@@ -1065,6 +1067,49 @@ testAPIConnection();
   ]
 };
 
+async function callAventuraApi(endpoint, method = 'GET', data = null) {
+  try {
+    // Build the full URL
+    const apiUrl = `${API_CONFIG.baseUrl}${endpoint}`;
+    
+    // Prepare request options
+    const options = {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    };
+    
+    // Add authorization if we have a token (except for login endpoint)
+    if (!endpoint.includes('verify-password')) {
+      const sessionToken = localStorage.getItem('aventuraSessionToken');
+      if (sessionToken) {
+        options.headers['Authorization'] = `Bearer ${sessionToken}`;
+      }
+    }
+    
+    // Add body data if provided
+    if (data && (method === 'POST' || method === 'PUT')) {
+      options.body = JSON.stringify(data);
+    }
+    
+    // Make the request
+    const response = await fetch(apiUrl, options);
+    
+    // Check for HTTP errors
+    if (!response.ok) {
+      throw new Error(`API call failed: ${response.status}`);
+    }
+    
+    // Parse and return JSON response
+    return await response.json();
+  } catch (error) {
+    console.error('API call error:', error);
+    throw error;
+  }
+}
+
 // Function to get a random voice from the array
 function getRandomAzureVoice() {
   const randomIndex = Math.floor(Math.random() * azureSpeechConfig.spanishVoices.length);
@@ -1147,14 +1192,39 @@ async function checkPassword() {
     // Get the password input value
     const passwordInput = document.getElementById('password-input');
     
+    if (!passwordInput || !passwordInput.value) {
+      const loginError = document.getElementById('login-error');
+      loginError.textContent = "Please enter a password.";
+      loginError.style.display = 'block';
+      return;
+    }
+    
+    // Show loading indicator
+    const loginButton = document.getElementById('login-button');
+    if (loginButton) {
+      loginButton.disabled = true;
+      loginButton.textContent = "Verifying...";
+    }
+    
     // Call your secure API to verify the password
     const response = await fetch('https://aventuras-api.azurewebsites.net/api/verify-password', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ password: passwordInput.value })
+      body: JSON.stringify({ password: passwordInput.value }),
+      credentials: 'include' // Include credentials for cookies
     });
+    
+    // Reset button state
+    if (loginButton) {
+      loginButton.disabled = false;
+      loginButton.textContent = "Enter";
+    }
+    
+    if (!response.ok) {
+      throw new Error(`API returned status: ${response.status}`);
+    }
     
     const data = await response.json();
     
@@ -1164,27 +1234,124 @@ async function checkPassword() {
     const loginError = document.getElementById('login-error');
     
     if (data.success) {
+      // Store session token if provided
+      if (data.token) {
+        localStorage.setItem('aventuraSessionToken', data.token);
+      }
+      
       // Password correct - show game
       loginScreen.style.display = 'none';
       gameContainer.style.display = 'block';
       
       // Initialize Azure Speech
-      initializeAzureSpeech();
+      await initializeAzureSpeech();
+      
+      // Load first question
+      loadQuestion();
     } else {
       // Password incorrect - show error
+      loginError.textContent = data.message || "Incorrect password. Please try again.";
       loginError.style.display = 'block';
       passwordInput.value = '';
     }
   } catch (error) {
     console.error("Failed to verify password:", error);
     
+    // Reset button state
+    const loginButton = document.getElementById('login-button');
+    if (loginButton) {
+      loginButton.disabled = false;
+      loginButton.textContent = "Enter";
+    }
+    
     // Show error message to user
     const loginError = document.getElementById('login-error');
-    loginError.textContent = "Game configuration error. Please contact administrator.";
+    loginError.textContent = "Connection error. Please try again or contact administrator.";
     loginError.style.display = 'block';
   }
 }
 
+// Function to verify if the current session is valid
+async function verifySession() {
+  try {
+    // Check if we have a stored token
+    const sessionToken = localStorage.getItem('aventuraSessionToken');
+    
+    if (!sessionToken) {
+      // No token found, user needs to log in
+      return false;
+    }
+    
+    // Verify the token with the backend
+    const response = await callAventuraApi(API_CONFIG.endpoints.verifySession, 'GET');
+    
+    if (!response.success || !response.valid) {
+      // Session is invalid or expired
+      localStorage.removeItem('aventuraSessionToken');
+      return false;
+    }
+    
+    // Session is valid
+    return true;
+  } catch (error) {
+    console.error('Session verification error:', error);
+    // On error, assume session is invalid
+    localStorage.removeItem('aventuraSessionToken');
+    return false;
+  }
+}
+
+// Function to handle session expiration
+function handleSessionExpired() {
+  // Hide game container
+  const gameContainer = document.getElementById('game-container');
+  if (gameContainer) {
+    gameContainer.style.display = 'none';
+  }
+  
+  // Show login screen
+  const loginScreen = document.getElementById('login-screen');
+  if (loginScreen) {
+    loginScreen.style.display = 'flex';
+  }
+  
+  // Show session expired message
+  const loginError = document.getElementById('login-error');
+  if (loginError) {
+    loginError.textContent = "Your session has expired. Please log in again.";
+    loginError.style.display = 'block';
+  }
+  
+  // Clear stored token
+  localStorage.removeItem('aventuraSessionToken');
+}
+
+// Function to handle session expiration
+function handleSessionExpired() {
+  // Hide game container
+  const gameContainer = document.getElementById('game-container');
+  if (gameContainer) {
+    gameContainer.style.display = 'none';
+  }
+  
+  // Show login screen
+  const loginScreen = document.getElementById('login-screen');
+  if (loginScreen) {
+    loginScreen.style.display = 'flex';
+  }
+  
+  // Show session expired message
+  const loginError = document.getElementById('login-error');
+  if (loginError) {
+    loginError.textContent = "Your session has expired. Please log in again.";
+    loginError.style.display = 'block';
+  }
+  
+  // Clear stored token
+  localStorage.removeItem('aventuraSessionToken');
+}
+
+// Azure initialization function
 // Azure initialization function
 async function initializeAzureSpeech() {
   try {
@@ -1192,46 +1359,57 @@ async function initializeAzureSpeech() {
     const sdkLoaded = await ensureSpeechSDK(3);
     if (!sdkLoaded) {
       console.warn("Azure Speech SDK not loaded, falling back to browser speech synthesis");
-      return;
+      return false;
     }
     
-    // Get the speech key from secure API endpoint
-    const response = await fetch('https://aventuras-api.azurewebsites.net/api/get-speech-key', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Failed to retrieve speech key: ${response.status}`);
+    // Get the session token
+    const sessionToken = localStorage.getItem('aventuraSessionToken');
+    if (!sessionToken) {
+      console.warn("No session token available for speech initialization");
+      return false;
     }
     
-    const data = await response.json();
+    // Get the speech key from secure API endpoint using our helper function
+    const response = await callAventuraApi(API_CONFIG.endpoints.getSpeechKey, 'GET');
     
-    if (data.success) {
-      // Set the key in your azureSpeechConfig object
-      azureSpeechConfig.key = data.key;
-      console.log("Azure Speech initialized successfully");
-    } else {
-      console.error("Failed to get speech key:", data.message);
+    if (!response.success) {
+      throw new Error(`Failed to retrieve speech key: ${response.message}`);
     }
+    
+    // Set the key in your azureSpeechConfig object
+    azureSpeechConfig.key = response.key;
+    console.log("Azure Speech initialized successfully");
+    return true;
   } catch (error) {
     console.error("Failed to initialize Azure Speech:", error);
+    
+    // Check if this is a session expired error
+    if (error.message && error.message.includes('401')) {
+      handleSessionExpired();
+    }
+    
     // Continue without speech functionality - graceful degradation
+    return false;
   }
 }
 
 async function getSecretFromSecureEndpoint(secretName) {
     try {
-        // Use key as query parameter only
-        const response = await fetch(`https://aventuras-api.azurewebsites.net/api/getSecretFunction?name=${secretName}&code=E4-GRuk9YPOXCV42OyF4ciV2-UJrTBTrgW0K0cOaS1wvAzFuCQox9A==`, {
+        // Get session token from local storage
+        const sessionToken = localStorage.getItem('aventuraSessionToken');
+        
+        if (!sessionToken) {
+            throw new Error('No session token available. Please log in again.');
+        }
+        
+        // Call the API with proper authorization
+        const response = await fetch(`${API_CONFIG.baseUrl}/api/get-secret`, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${sessionToken}`
             },
-            credentials: 'include',
-            mode: 'cors'
+            credentials: 'include'
         });
         
         if (!response.ok) {
@@ -1239,37 +1417,61 @@ async function getSecretFromSecureEndpoint(secretName) {
         }
         
         const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.message || 'Failed to retrieve secret');
+        }
+        
         return data.value;
     } catch (error) {
         console.error("Error retrieving secret:", error);
-        
-            }
-        }
-        
         throw error;
     }
+}
 
 // Helper function to make authenticated API calls to Azure Functions
 async function callAventuraApi(endpoint, method = 'GET', data = null) {
   try {
-    // Use the key directly from the config (which gets it from SECRETS)
-    const apiKey = API_CONFIG.functionKey;
-        
-        // Add body data if provided
-        if (data && (method === 'POST' || method === 'PUT')) {
-            options.body = JSON.stringify(data);
-        }
-        
-        const response = await fetch(apiUrl, options);
-        if (!response.ok) {
-            throw new Error(`API call failed: ${response.status}`);
-        }
-        
-        return await response.json();
-    } catch (error) {
-        console.error('API call error:', error);
-        throw error;
+    // Build the full URL
+    const apiUrl = `${API_CONFIG.baseUrl}${endpoint}`;
+    
+    // Prepare request options
+    const options = {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    };
+    
+    // Add authorization if we have a token (except for login endpoint)
+    if (!endpoint.includes('verify-password')) {
+      const sessionToken = localStorage.getItem('aventuraSessionToken');
+      if (sessionToken) {
+        options.headers['Authorization'] = `Bearer ${sessionToken}`;
+      }
     }
+    
+    // Add body data if provided
+    if (data && (method === 'POST' || method === 'PUT')) {
+      options.body = JSON.stringify(data);
+    }
+    
+    // Make the request
+    const response = await fetch(apiUrl, options);
+    
+    // Check for HTTP errors
+    if (!response.ok) {
+      throw new Error(`API call failed: ${response.status}`);
+    }
+    
+    // Parse and return JSON response
+    return await response.json();
+  } catch (error) {
+    console.error('API call error:', error);
+    throw error;
+  }
+}
 
     // Translation data
     const translationData = [
@@ -14732,25 +14934,56 @@ const draggables = document.querySelectorAll('.draggable');
         }
     }
 
-    // Initialize the game on page load
-    window.addEventListener('DOMContentLoaded', function () {
-        // Set initial mobile status
-        isMobileDevice = window.innerWidth <= 768;
-        console.log("Initial isMobileDevice:", isMobileDevice);
-        
-        // Load the voices first (this can be asynchronous in some browsers)
-        if (window.speechSynthesis) {
-            // Pre-load the voices
-            window.speechSynthesis.getVoices();
+// Initialize the game on page load
+window.addEventListener('DOMContentLoaded', async function () {
+  // Set initial mobile status
+  isMobileDevice = window.innerWidth <= 768;
+  console.log("Initial isMobileDevice:", isMobileDevice);
+  
+  // Check if user is already authenticated
+  const isAuthenticated = await verifySession();
+  
+  if (isAuthenticated) {
+    // User is already authenticated
+    const loginScreen = document.getElementById('login-screen');
+    const gameContainer = document.getElementById('game-container');
+    
+    if (loginScreen && gameContainer) {
+      loginScreen.style.display = 'none';
+      gameContainer.style.display = 'block';
+      
+      // Initialize speech and start game
+      await initializeAzureSpeech();
+      loadQuestion();
+    }
+  } else {
+    // User needs to log in
+    const loginScreen = document.getElementById('login-screen');
+    const gameContainer = document.getElementById('game-container');
+    
+    if (loginScreen && gameContainer) {
+      loginScreen.style.display = 'flex';
+      gameContainer.style.display = 'none';
+    }
+  }
+  
+  // Load the voices first (this can be asynchronous in some browsers)
+  if (window.speechSynthesis) {
+    // Pre-load the voices
+    window.speechSynthesis.getVoices();
 
-            // In Chrome and some other browsers, voices are loaded asynchronously
-            if (speechSynthesis.onvoiceschanged !== undefined) {
-                speechSynthesis.onvoiceschanged = function () {
-                    // Voices are now loaded
-                    console.log("Voices loaded:", window.speechSynthesis.getVoices().length);
-                };
-            }
-        }
+    // In Chrome and some other browsers, voices are loaded asynchronously
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = function () {
+        // Voices are now loaded
+        console.log("Voices loaded:", window.speechSynthesis.getVoices().length);
+      };
+    }
+  }
+  
+  // Rest of your existing initialization code...
+});
+
 
         // Add CSS for drag and drop
         const style = document.createElement('style');
