@@ -3,6 +3,7 @@ async function getSpeechToken() {
     // Log the client key (first few characters only for security)
     const keyPrefix = CLIENT_API_KEY ? CLIENT_API_KEY.substring(0, 3) + "..." : "undefined";
     console.log("Using client key:", keyPrefix);
+    console.log(`Making request to ${tokenEndpoint} with region: ${speechRegion}`);
     
     // Get new token from our serverless function with API key
     console.log("Preparing to fetch speech token");
@@ -25,10 +26,15 @@ async function getSpeechToken() {
     const data = await response.json();
     console.log("Speech token received successfully");
     
-    // Rest of your function
-    // ...
   } catch (error) {
     console.error('Detailed error getting speech token:', error);
+    console.error('Error details:', error.stack);
+
+    if (error.response) {
+      console.error('Azure response status:', error.response.status);
+      console.error('Azure response data:', JSON.stringify(error.response.data));
+    }
+
     throw error;
   }
 }
