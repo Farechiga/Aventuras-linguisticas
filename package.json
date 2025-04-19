@@ -9,6 +9,6 @@
         "axios": "^1.8.4"
     },
     "devDependencies": {
-        "netlify-cli": "^17.2.0"
+        "netlify-cli": "^20.0.2"
     }
 }
