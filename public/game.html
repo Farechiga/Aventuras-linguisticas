@@ -914,16 +914,23 @@ let CLIENT_API_KEY = '';
 // Add this function to fetch the key
 async function initializeApp() {
   try {
+    console.log("Attempting to fetch client key");
     const response = await fetch('/api/get-client-key');
+    
+    if (!response.ok) {
+      console.error("Failed to get client key:", response.status, response.statusText);
+      throw new Error('Failed to get token: ' + response.statusText);
+    }
+    
     const data = await response.json();
     CLIENT_API_KEY = data.key;
-    console.log('App initialized successfully');
+    console.log("Client key received successfully");
     
     // Now you can start the game
     loadQuestion();
   } catch (error) {
     console.error('Failed to initialize app:', error);
-    showNotification('Failed to initialize app', 'error');
+    showNotification('Failed to initialize app: ' + error.message, 'error');
   }
 }
 
@@ -13179,13 +13186,16 @@ async function getSpeechToken() {
   
   try {
     // Get new token from our serverless function with API key
+    console.log("Fetching speech token with API key");
     const response = await fetch('/api/get-speech-token', {
+      method: 'GET',
       headers: {
         'x-api-key': CLIENT_API_KEY
       }
     });
     
     if (!response.ok) {
+      console.error("Token fetch failed:", response.status, response.statusText);
       throw new Error('Failed to get token: ' + response.statusText);
     }
     
@@ -13204,7 +13214,6 @@ async function getSpeechToken() {
     return speechToken;
   } catch (error) {
     console.error('Error getting speech token:', error);
-    showNotification('Error retrieving speech token', 'error');
     throw error;
   }
 }
